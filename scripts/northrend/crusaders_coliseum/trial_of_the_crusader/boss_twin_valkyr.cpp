@@ -90,6 +90,7 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
         m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_NONE);
         stage = 0;
         m_creature->SetHealth(m_creature->GetMaxHealth());
+        m_creature->SetSpeedRate(MOVE_WALK, 0.5f);
     }
 
     void JustReachedHome()
@@ -145,7 +146,6 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
             else if(pDoneBy->HasAura(SPELL_DARK_ESSENCE))
                 uiDamage += uiDamage/2;
         }
-
         m_pInstance->SetData(DATA_HEALTH_FJOLA, m_creature->GetHealth() >= uiDamage ? m_creature->GetHealth() - uiDamage : 0);
     }
 
@@ -250,6 +250,7 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
         m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_NONE);
         stage = 0;
         m_creature->SetHealth(m_creature->GetMaxHealth());
+        m_creature->SetSpeedRate(MOVE_WALK, 0.5f);
     }
 
     void JustReachedHome()

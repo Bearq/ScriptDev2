@@ -218,7 +218,6 @@ enum Spells
     SPELL_DIVINE_SHIELD         = 63148,
     SPELL_BLOCK                 = 45438,
 
-
     //NPC
     NPC_FELHUNTER = 35465,
     NPC_CAT     = 35610,
@@ -230,24 +229,27 @@ struct MANGOS_DLL_DECL boss_faction_championsAI : public BSWScriptedAI
     boss_faction_championsAI(Creature* pCreature, uint32 aitype) : BSWScriptedAI(pCreature) 
     {
         m_pInstance = (ScriptedInstance *) pCreature->GetInstanceData();
+        m_uiMapDifficulty = pCreature->GetMap()->GetDifficulty();
+        m_bIsHeroicMode = (m_uiMapDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || m_uiMapDifficulty == RAID_DIFFICULTY_25MAN_HEROIC);
         mAIType = aitype;
         Init();
     }
 
     ScriptedInstance* m_pInstance;
+    bool m_bIsHeroicMode;
 
+    Difficulty m_uiMapDifficulty;
     uint32 mAIType;
     uint32 ThreatTimer;
-    uint32 CCTimer;
     uint32 m_uiChangeTargetTimer;
+    uint32 m_uiInsygniaTimer;
 
     void Init()
     {
-        CCTimer = urand(30*IN_MILLISECONDS, 60*IN_MILLISECONDS);
         ThreatTimer = 5000;
         m_uiChangeTargetTimer = 6000;
         resetTimers();
-        m_creature->SetInCombatWithZone();
+        m_uiInsygniaTimer = urand(30*IN_MILLISECONDS, 60*IN_MILLISECONDS);
         m_creature->SetRespawnDelay(DAY);
     }
 
@@ -419,17 +421,18 @@ struct MANGOS_DLL_DECL boss_faction_championsAI : public BSWScriptedAI
         if(ThreatTimer < uiDiff)
         {
             UpdatePower();
-            //UpdateThreat();
             ThreatTimer = 2000;
         }
         else ThreatTimer -= uiDiff;
 
-        if(CCTimer < uiDiff)
+        if(m_bIsHeroicMode)
         {
-            RemoveCC();
-            CCTimer = 5*MINUTE;
+            if(m_uiInsygniaTimer < uiDiff)
+            {
+                RemoveCC();
+                m_uiInsygniaTimer = 5*MINUTE*IN_MILLISECONDS;
+            }else m_uiInsygniaTimer -= uiDiff;
         }
-        else CCTimer -= uiDiff;
 
     }
 };
@@ -738,7 +741,6 @@ struct MANGOS_DLL_DECL mob_toc_paladinAI : public boss_faction_championsAI
         {
             if(Unit* target = DoSelectLowestHpFriendly(40.0f))
             {
-                m_creature->CastSpell(target, SPELL_CLEANSE, true);
                 DoCastSpellIfCan(target, SPELL_FLASH_HEAL);
                 m_uiFlashHealTimer = urand(1500, 6000);
             }
@@ -1905,7 +1907,7 @@ struct MANGOS_DLL_DECL  mob_toc_enh_shamanAI : public boss_faction_championsAI
     {
         m_uiHeroismOrBloodlustTimer = urand(25*IN_MILLISECONDS, 60*IN_MILLISECONDS);
         m_uiEarthShockTimer = urand(5*IN_MILLISECONDS, 8*IN_MILLISECONDS);
-        m_uiStormstrikeTimer = urand(5*IN_MILLISECONDS, 90*IN_MILLISECONDS);
+        m_uiStormstrikeTimer = urand(5*IN_MILLISECONDS, 20*IN_MILLISECONDS);
         m_uiLavaLashTimer = urand(5*IN_MILLISECONDS, 8*IN_MILLISECONDS);
         m_uiWindFuryTimer = urand(5000, 15000);
         m_uiKillPlayerTimer = 1000;
@@ -1963,7 +1965,7 @@ struct MANGOS_DLL_DECL  mob_toc_enh_shamanAI : public boss_faction_championsAI
         if(m_uiStormstrikeTimer <= uiDiff)
         {
             DoCastSpellIfCan(m_creature->getVictim(), SPELL_STORMSTRIKE);
-            m_uiStormstrikeTimer = urand(5*IN_MILLISECONDS, 90*IN_MILLISECONDS);
+            m_uiStormstrikeTimer = urand(5*IN_MILLISECONDS, 20*IN_MILLISECONDS);
         }else m_uiStormstrikeTimer -= uiDiff;
 
         if(m_uiLavaLashTimer <= uiDiff)
@@ -2339,3 +2341,17 @@ void AddSC_boss_faction_champions()
     newscript->GetAI = &GetAI_mob_toc_pet_hunter;
     newscript->RegisterSelf();
 }
+
+/*
+UPDATE `creature_template` SET `mindmg` = 417, `maxdmg` = 582, `attackpower` = 608, `unit_flags` = 64, `minrangedmg` = 341, `maxrangedmg` = 506, `rangedattackpower` = 80, WHERE `entry` = 34454;
+UPDATE `creature_template` SET `modelid_1` = 29781 WHERE `entry` = 34459;
+UPDATE `creature_template` SET `modelid_1` = 29780 WHERE `entry` = 34451;
+UPDATE `creature_template` SET `name` = 'Erin Misthoof' WHERE `entry` = 34451;
+UPDATE `creature_template` SET `name` = 'Birana Stormhoof' WHERE `entry` = 34459;
+UPDATE `creature_template` SET `name` = 'Melador Valestrider' WHERE `entry` = 34460;
+UPDATE `creature_template` SET `modelid_1` = 29780 WHERE `entry` = 34460;
+UPDATE `creature_template` SET `name` = 'Kavina Grovesong' WHERE `entry` = 34469;
+UPDATE `creature_template` SET `modelid_1` = 29781 WHERE `entry` = 34469;
+UPDATE creature_template SET mechanic_immune_mask = 1 WHERE entry IN (34460, 34463, 34461, 34472, 34475, 34471, 34473, 34468, 34467, 34474, 34470, 34466, 34465, 34469, 34451, 34455, 34458, 34454, 34453, 34456, 34441, 34449, 34448, 34450, 34444, 34447, 34445, 34459);
+*/
+

@@ -50,6 +50,8 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
 
     uint32 m_auiCrusadersCount;
 
+    uint64 WebDoorGUID;
+
     void Initialize()
     {
         for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
@@ -62,6 +64,7 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
         m_auiNorthrendBeasts = NOT_STARTED;
         m_auiEventTimer = 1000;
         m_auiCrusadersCount = 6;
+        WebDoorGUID = 0;
         needsave = false;
     }
 
@@ -150,6 +153,14 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
                              m_auiEncounter[4] = uiData; break;
         case TYPE_LICH_KING: m_auiEncounter[5] = uiData; break;
         case TYPE_ANUBARAK:  m_auiEncounter[6] = uiData; 
+                            if(uiData == IN_PROGRESS)
+                            {
+                                DoCloseDoor(GO_WEB_DOOR);
+                            }
+                            if(uiData == FAIL)
+                            {
+                                DoOpenDoor(GO_WEB_DOOR);
+                            }
                             if (uiData == DONE) {
                             if (Difficulty == RAID_DIFFICULTY_10MAN_HEROIC)
                             {
@@ -193,12 +204,14 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
         {
             DoCloseDoor(GetData64(GO_WEST_PORTCULLIS));
             DoCloseDoor(GetData64(GO_NORTH_PORTCULLIS));
+            DoCloseDoor(GetData64(GO_WEB_DOOR));
 //            DoCloseDoor(GetData64(GO_SOUTH_PORTCULLIS));
         }
         else
         {
             DoOpenDoor(GetData64(GO_WEST_PORTCULLIS));
             DoOpenDoor(GetData64(GO_NORTH_PORTCULLIS));
+            DoOpenDoor(GetData64(GO_WEB_DOOR));
 //            DoOpenDoor(GetData64(GO_SOUTH_PORTCULLIS));
         };
 
