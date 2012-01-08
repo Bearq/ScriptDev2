@@ -89,23 +89,17 @@ enum
 /*####
 # Lord Marrowgar
 ####*/
-struct MANGOS_DLL_DECL boss_lord_marrowgarAI : public ScriptedAI
+struct MANGOS_DLL_DECL boss_lord_marrowgarAI : public base_icc_bossAI
 {
-    boss_lord_marrowgarAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_lord_marrowgarAI(Creature* pCreature) : base_icc_bossAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bSaidIntro = false;
-        m_uiMapDifficulty = pCreature->GetMap()->GetDifficulty();
-        m_bIsHeroic = m_uiMapDifficulty > RAID_DIFFICULTY_25MAN_NORMAL;
         m_uiMaxCharges = m_bIsHeroic ? MAX_CHARGES_HEROIC : MAX_CHARGES_NORMAL;
 
         Reset();
     }
 
-    ScriptedInstance *m_pInstance;
-
     bool m_bSaidIntro;
-    bool m_bIsHeroic;
 
     uint8 m_uiPhase;
     uint8 m_uiChargesCount;
@@ -118,8 +112,6 @@ struct MANGOS_DLL_DECL boss_lord_marrowgarAI : public ScriptedAI
     uint32 m_uiBoneStormTimer;
     uint32 m_uiBoneStormChargeTimer;
     uint32 m_uiBoneStormColdflameTimer;
-
-    Difficulty m_uiMapDifficulty;
 
     void Reset()
     {

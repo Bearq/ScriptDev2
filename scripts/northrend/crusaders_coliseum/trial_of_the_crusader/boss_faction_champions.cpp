@@ -419,11 +419,11 @@ struct MANGOS_DLL_DECL boss_faction_championsAI : public BSWScriptedAI
        if (m_pInstance && m_pInstance->GetData(TYPE_CRUSADERS) != IN_PROGRESS) 
             m_creature->ForcedDespawn();
 
-        if(m_uiChangeTargetTimer < uiDiff)
+        /*if(m_uiChangeTargetTimer < uiDiff)
         {
             UpdateThreat();
             m_uiChangeTargetTimer = 6000;
-        }else m_uiChangeTargetTimer -= uiDiff;
+        }else m_uiChangeTargetTimer -= uiDiff;*/
 
         if(UpdateTimer < uiDiff)
         {

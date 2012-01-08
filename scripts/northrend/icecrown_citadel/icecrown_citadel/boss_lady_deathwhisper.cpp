@@ -103,9 +103,9 @@ static Locations SpawnLoc[]=
     {-525.652466f, 2206.611328f, 62.823681f},  // 9 Upper marsh 3
 };
 
-struct MANGOS_DLL_DECL boss_lady_deathwhisper_eventAI : public ScriptedAI
+struct MANGOS_DLL_DECL boss_lady_deathwhisper_eventAI : public base_icc_bossAI
 {
-    boss_lady_deathwhisper_eventAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_lady_deathwhisper_eventAI(Creature* pCreature) : base_icc_bossAI(pCreature)
     {
         m_uiStep = 0;
         m_uiEventTimer = 0;
@@ -219,18 +219,8 @@ struct MANGOS_DLL_DECL boss_lady_deathwhisperAI : public boss_lady_deathwhisper_
 {
     boss_lady_deathwhisperAI(Creature* pCreature) : boss_lady_deathwhisper_eventAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_uiMapDifficulty = pCreature->GetMap()->GetDifficulty();
-        m_bIsHeroic = m_uiMapDifficulty > RAID_DIFFICULTY_25MAN_NORMAL;
-        m_bIs25Man = (m_uiMapDifficulty == RAID_DIFFICULTY_25MAN_NORMAL || m_uiMapDifficulty == RAID_DIFFICULTY_25MAN_HEROIC);
-
         Reset();
     }
-
-    ScriptedInstance *m_pInstance;
-    Difficulty m_uiMapDifficulty;
-    bool m_bIsHeroic;
-    bool m_bIs25Man;
 
     bool m_bIsPhaseOne;
     uint32 m_uiManaBarrierCheckTimer;

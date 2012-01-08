@@ -21,10 +21,10 @@ enum
     NPC_RIMEFANG                    = 36661,
     NPC_SINDRAGOSA                  = 37755,
 
-    NPC_SYLVANAS_PART1              = 36990,
-    NPC_SYLVANAS_PART2              = 38189,
-    NPC_JAINA_PART1                 = 36993,
-    NPC_JAINA_PART2                 = 38188,
+    NPC_SYLVANAS_PART_1             = 36990,
+    NPC_SYLVANAS_PART_2             = 38189,
+    NPC_JAINA_PART_1                = 36993,
+    NPC_JAINA_PART_2                = 38188,
     NPC_KILARA                      = 37583,
     NPC_ELANDRA                     = 37774,
     NPC_KORALEN                     = 37779,
@@ -32,9 +32,9 @@ enum
     NPC_CHAMPION_1_HORDE            = 37584,
     NPC_CHAMPION_2_HORDE            = 37587,
     NPC_CHAMPION_3_HORDE            = 37588,
-    NPC_CHAMPION_1_ALLIANCE         = 37496,
-    NPC_CHAMPION_2_ALLIANCE         = 37497,
-    NPC_CHAMPION_3_ALLIANCE         = 37498,
+    NPC_CHAMPION_1_ALLIANCE         = 37496,    //Champion with shield human
+    NPC_CHAMPION_2_ALLIANCE         = 37497,    //Champion with staff. Human Mage
+    NPC_CHAMPION_3_ALLIANCE         = 37498,    //CHampion with shield and mace. Shaman Dranei
 
     NPC_SLAVE_HORDE_1               = 37578,
     NPC_SLAVE_HORDE_2               = 37577,
@@ -46,6 +46,7 @@ enum
     NPC_MARTIN_VICTUS_END           = 37580,
     NPC_GORKUN_IRONSKULL_SLAVE      = 37592,
     NPC_GORKUN_IRONSKULL_END        = 37581,
+    NPC_SKELETAN_SLAVE              = 36881,
 
     GO_ICEWALL                      = 201885,               // open after gafrost/krick
     GO_HALLS_OF_REFLECT_PORT        = 201848,               // unlocked by jaina/sylvanas at last outro

@@ -149,12 +149,10 @@ float fPositions[12][4] =
 };
 
 // Event handler
-struct MANGOS_DLL_DECL boss_deathbringer_saurfang_eventAI : public ScriptedAI
+struct MANGOS_DLL_DECL boss_deathbringer_saurfang_eventAI : public base_icc_bossAI
 {
-    boss_deathbringer_saurfang_eventAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_deathbringer_saurfang_eventAI(Creature* pCreature) : base_icc_bossAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-
         m_uiEventStep = 0;
         m_uiNextEventTimer = 0;
 
@@ -168,8 +166,6 @@ struct MANGOS_DLL_DECL boss_deathbringer_saurfang_eventAI : public ScriptedAI
         m_guidNpc.Clear();
         m_lGuards.clear();
     }
-
-    ScriptedInstance *m_pInstance;
 
     uint32 m_uiNextEventTimer;
     uint32 m_uiEventStep;
@@ -671,16 +667,9 @@ struct MANGOS_DLL_DECL boss_deathbringer_saurfangAI : public boss_deathbringer_s
 {
     boss_deathbringer_saurfangAI(Creature* pCreature) : boss_deathbringer_saurfang_eventAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_powerBloodPower = m_creature->getPowerType(); // don't call this function multiple times in script
-        m_uiMapDifficulty = pCreature->GetMap()->GetDifficulty();
-        m_bIsHeroic = m_uiMapDifficulty > RAID_DIFFICULTY_25MAN_NORMAL;
-        m_bIs25Man = (m_uiMapDifficulty == RAID_DIFFICULTY_25MAN_NORMAL || m_uiMapDifficulty == RAID_DIFFICULTY_25MAN_HEROIC);
-
         ResetFight();
     }
-
-    ScriptedInstance *m_pInstance;
 
     uint32 m_uiRuneOfBloodTimer;
     uint32 m_uiBoilingBloodTimer;
@@ -690,11 +679,8 @@ struct MANGOS_DLL_DECL boss_deathbringer_saurfangAI : public boss_deathbringer_s
     uint32 m_uiBerserkTimer;
 
     bool m_bIsFrenzied;
-    bool m_bIsHeroic;
-    bool m_bIs25Man;
 
     Powers m_powerBloodPower;
-    Difficulty m_uiMapDifficulty;
 
     void ResetFight()
     {

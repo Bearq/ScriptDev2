@@ -412,6 +412,7 @@ struct MANGOS_DLL_DECL base_blood_prince_council_bossAI : public base_icc_bossAI
     {
         if (pSpell->Id == m_uiInvocationSpellEntry)
         {
+            m_creature->SetHealth(pCaster->GetHealth());
             m_bIsEmpowered = true;
             DoScriptText(m_iSayInvocationEntry, m_creature);
         }
@@ -428,6 +429,7 @@ struct MANGOS_DLL_DECL base_blood_prince_council_bossAI : public base_icc_bossAI
             if (m_uiEmpowermentFadeTimer <= uiDiff)
             {
                 m_creature->RemoveAurasDueToSpell(m_uiInvocationSpellEntry);
+                m_creature->SetHealth(1);
                 m_bIsEmpowered = false;
                 m_bIsSaidSpecial = false;
                 m_uiEmpowermentFadeTimer = 30000;
@@ -453,6 +455,7 @@ struct MANGOS_DLL_DECL boss_valanar_iccAI : public base_blood_prince_council_bos
 {
     boss_valanar_iccAI(Creature* pCreature) : base_blood_prince_council_bossAI(pCreature)
     {
+        Reset();
         m_uiInvocationSpellEntry = SPELL_INVOCATION_VALANAR;
         m_iSayInvocationEntry = SAY_VALANAR_INVOCATION;
     }
@@ -551,6 +554,7 @@ struct MANGOS_DLL_DECL boss_keleseth_iccAI : public base_blood_prince_council_bo
 {
     boss_keleseth_iccAI(Creature* pCreature) : base_blood_prince_council_bossAI(pCreature)
     {
+        Reset();
         m_uiInvocationSpellEntry = SPELL_INVOCATION_KELESETH;
         m_iSayInvocationEntry = SAY_KELESETH_INVOCATION;
     }
@@ -640,6 +644,7 @@ struct MANGOS_DLL_DECL boss_taldaram_iccAI : public base_blood_prince_council_bo
 {
     boss_taldaram_iccAI(Creature* pCreature) : base_blood_prince_council_bossAI(pCreature)
     {
+        Reset();
         m_uiInvocationSpellEntry = SPELL_INVOCATION_TALDARAM;
         m_iSayInvocationEntry = SAY_TALDARAM_INVOCATION;
     }
@@ -761,9 +766,9 @@ CreatureAI* GetAI_mob_shock_vortex(Creature* pCreature)
 };
 
 // Dark Nucleus
-struct MANGOS_DLL_DECL mob_dark_nucleusAI : public ScriptedAI
+struct MANGOS_DLL_DECL mob_dark_nucleusAI : public base_icc_bossAI
 {
-    mob_dark_nucleusAI(Creature *pCreature) : ScriptedAI(pCreature)
+    mob_dark_nucleusAI(Creature *pCreature) : base_icc_bossAI(pCreature)
     {
         Reset();
     }
@@ -778,6 +783,15 @@ struct MANGOS_DLL_DECL mob_dark_nucleusAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
+        if (m_pInstance)
+        {
+            if (m_pInstance->GetData(TYPE_BLOOD_COUNCIL) != IN_PROGRESS)
+            {
+                m_creature->ForcedDespawn();
+                return;
+            }
+        }
+
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 

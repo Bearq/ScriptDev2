@@ -372,15 +372,14 @@ struct MANGOS_DLL_DECL boss_blood_queen_lanathelAI : public base_icc_bossAI
                      * but we can use SelectAttackingTarget() here
                      * if (DoCastSpellIfCan(m_creature, SPELL_SWARMING_SHADOWS) == CAST_OK)
                      */
-                    /*if (Unit *pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1,
-                            SPELL_SWARMING_SHADOWS_TRIGGERED, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
+                    if (Unit *pTarget = SelectRandomRangedTarget(m_creature))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_SWARMING_SHADOWS_TRIGGERED) == CAST_OK)
                         {
                             m_uiSwarmingShadowsTimer = urand(30000, 35000);
                             DoScriptText(SAY_SHADOWS, m_creature);
                         }
-                    }*/
+                    }
                 }
                 else
                     m_uiSwarmingShadowsTimer -= uiDiff;

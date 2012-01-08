@@ -1830,6 +1830,1026 @@ CreatureAI* GetAI_npc_seaforium_depth_charge(Creature* pCreature)
     return new npc_seaforium_depth_chargeAI(pCreature);
 }
 
+
+/*######
+##En'kilah Necrolord
+######*/
+enum
+{
+    OVERLORD_SAURFANG_MODEL_ID = 23360,
+    OVERLORD_SAURFANG_ATTACKER_MODEL_ID = 23033,
+    SAURFANGS_AXE_ID = 366,
+
+    ENKILAH_NECROLORD_ID = 25730,
+    VARIDUS_ID = 25618,
+    SHADOWSTALKER_GETRY_ID = 25729,
+
+    SPELL_SAURFANG_RAGE = 45950,
+    SPELL_SAURFANG_SHIELD_CHARGE = 15749,
+    SPELL_SAURFANG_CLEAVE = 16044,
+    SPELL_SAURFANG_MORTAL_STRIKE = 24573,
+    SPELL_SAURFANG_WHIRLWIND = 41097,
+    SPELL_SAURFANG_TERYFING_ROAR = 14100,
+    
+    ENKILAH_NECROLORD_SAY1 = -1999970,
+    ENKILAH_NECROLORD_SAY2 = -1999971,
+    ENKILAH_NECROLORD_SAY3 = -1999972,
+    ENKILAH_NECROLORD_SAY4 = -1999973,
+    ENKILAH_NECROLORD_SAY5 = -1999974,
+    ENKILAH_NECROLORD_SAY6 = -1999975,
+    ENKILAH_NECROLORD_SAY7 = -1999976,
+};
+
+enum PHASES
+{
+    PHASE_ZERO = 0,
+    PHASE_ONE = 1,
+    PHASE_TWO = 2,
+    PHASE_THREE = 3,
+    PHASE_FOUR = 4,
+    PHASE_FIVE = 5
+};
+
+const float ENKILAH_NECROLORD_SPAWN_COORDINATES[3] = {3132.2980f, 6540.0517f, 80.141441f};
+
+struct npc_enkilah_necrolordAI : public ScriptedAI
+{
+
+    Creature *pCreature;
+    Player *pPlayer;
+    Creature *pVaridus;
+    uint8 m_uiPhase;
+    uint8 m_uiStep;
+    uint32 m_uiStepTimer;
+    uint32 mortalStrikeTimer;
+    uint32 whirlwindTimer;
+    uint32 teryfingRoarTimer;
+    uint32 cleaveTimer;
+
+
+    npc_enkilah_necrolordAI(Creature *pCreature) : ScriptedAI(pCreature) 
+    {
+        m_uiStepTimer = 0;
+        pPlayer = 0;
+        this->pCreature = pCreature;
+        m_uiPhase = PHASE_TWO;
+        m_uiStep = 0;
+        mortalStrikeTimer = urand(6000,11000); // initial spell cast
+        cleaveTimer = urand(7000,11000); 
+        whirlwindTimer = urand(4000, 9000); 
+        teryfingRoarTimer = urand(15000, 23000);
+    }
+
+    
+    void Reset()
+    {
+    }
+
+    void MovementInform(uint32 uiType, uint32 uiPointId)
+    {
+        if(m_uiPhase == PHASE_TWO)
+            m_creature->SetFacingToObject(pPlayer);
+
+        if(m_uiPhase == PHASE_FOUR)
+            NextStep();
+    }
+
+    void NextStep(uint32 Time = 0) 
+    {
+        m_uiStepTimer = Time;
+        m_uiStep++;
+    }
+
+	void Spacer()
+	{
+		m_uiStepTimer = 1000000; 
+	}
+
+    void setPhase(PHASES phase, uint32 stepTimer = 0)
+    {
+        m_uiStepTimer = stepTimer; 
+        m_uiStep = 1;
+        m_uiPhase = phase;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if(m_uiStepTimer < uiDiff)
+		{
+			if(m_uiPhase == PHASE_TWO)  
+			{
+				switch( m_uiStep) 
+				{
+					case 1:
+                        pCreature->SetWalk(true);
+                        if((pPlayer->GetPositionX() > 3105 && pPlayer->GetPositionX() < 3144) && //only walk to player if he is in range else walk to getry
+                           (pPlayer->GetPositionY() > 6536 && pPlayer->GetPositionY() < 6589) &&
+                           (pPlayer->GetPositionZ() > 74   && pPlayer->GetPositionZ() < 81))
+                                pCreature->GetMotionMaster()->MovePoint(1, pPlayer->GetPositionX(), pPlayer->GetPositionY() - 4,
+                                pPlayer->GetPositionZ());
+                        else
+                            pCreature->GetMotionMaster()->MovePoint(1, 3122.8056f, 6549.4526f, 79.422905f);
+                       
+                        NextStep(35*IN_MILLISECONDS);
+					    break;
+
+                    case 2:
+                        if(Creature* pVaridus = GetClosestCreatureWithEntry(m_creature, VARIDUS_ID, 100.0f)) 
+                            m_creature->SetFacingToObject(pVaridus);
+                        NextStep(1*IN_MILLISECONDS);
+                        break;
+                     
+                    case 3:
+                        m_creature->SetDisplayId(OVERLORD_SAURFANG_MODEL_ID);
+                        m_creature->SetName("High Overlord Saurfang");
+                        NextStep(1*IN_MILLISECONDS);
+                        break;
+                     //morphing to saurfang
+
+                    case 4:
+                        DoScriptText(ENKILAH_NECROLORD_SAY1,m_creature); //surprise!!!
+                        m_creature->HandleEmote(EMOTE_ONESHOT_SHOUT);
+                        NextStep(2*IN_MILLISECONDS);
+                        break;
+
+                    case 5:
+                        if(pPlayer)
+                            m_creature->SetFacingToObject(pPlayer);
+                        NextStep(1*IN_MILLISECONDS);
+                        break;
+
+                    case 6:
+                        if(pPlayer)
+                        {
+                            m_creature->HandleEmote(EMOTE_ONESHOT_TALK);                      
+                            DoScriptText(ENKILAH_NECROLORD_SAY2,m_creature, pPlayer); //You were never alone %N!
+                        }
+                        NextStep(4*IN_MILLISECONDS);
+                        break;
+
+                    case 7:
+                        if(Creature* pVaridus = GetClosestCreatureWithEntry(m_creature, VARIDUS_ID, 100.0f)) 
+                            m_creature->SetFacingToObject(pVaridus);
+                        NextStep(1*IN_MILLISECONDS);
+                        break;
+
+                    case 8:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+                        DoScriptText(ENKILAH_NECROLORD_SAY3,m_creature); //This world you seek to...
+                        NextStep(3*IN_MILLISECONDS);
+                        break;
+
+                    case 9:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+                        DoScriptText(ENKILAH_NECROLORD_SAY4,m_creature); //We will fight you...
+                        NextStep(13*IN_MILLISECONDS);
+                        break;
+
+                    case 10:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_POINT);
+                        DoScriptText(ENKILAH_NECROLORD_SAY5,m_creature); //A fool who is about to end you...
+                        NextStep(6*IN_MILLISECONDS);
+                        break;
+
+                    case 11:
+                        m_creature->SetDisplayId(OVERLORD_SAURFANG_ATTACKER_MODEL_ID);
+                        m_creature->LoadEquipment(SAURFANGS_AXE_ID);
+                        NextStep(2*IN_MILLISECONDS);
+                        break;
+
+                    case 12:
+                        DoCastSpellIfCan(pCreature,SPELL_SAURFANG_RAGE,false);
+                        NextStep(3.7*IN_MILLISECONDS);
+                        break;
+
+                    case 13:
+                        if(pVaridus = GetClosestCreatureWithEntry(m_creature, VARIDUS_ID, 100.0f))
+                            DoCastSpellIfCan(pVaridus, SPELL_SAURFANG_SHIELD_CHARGE, false);   
+                        NextStep();
+                        break;
+
+                    case 14:
+                        setPhase(PHASE_THREE);
+                        break;                    
+				}
+			}
+            else if(m_uiPhase == PHASE_THREE)
+            {
+                if(pVaridus) 
+                {
+                    if(pVaridus->isDead())
+                    {
+                        setPhase(PHASE_FOUR);
+                        return;
+                    }
+                 }        
+                   
+                if(mortalStrikeTimer < uiDiff)
+                {
+                    if(whirlwindTimer >= 18000) //if WW didn't end do...
+                        mortalStrikeTimer = whirlwindTimer - 18000 + urand(0,6000);
+                    else
+                    {
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_SAURFANG_MORTAL_STRIKE);
+                        mortalStrikeTimer = urand(6000, 12000);  
+                    }
+                }
+                else
+                    mortalStrikeTimer -= uiDiff; 
+
+                if(cleaveTimer < uiDiff)
+                {
+                    if(whirlwindTimer >= 18000) 
+                        cleaveTimer = whirlwindTimer - 18000 + urand(0,4000);
+                    else
+                    {
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_SAURFANG_CLEAVE);
+                        cleaveTimer = urand(7000, 11000);  
+                    }
+                }
+                else
+                    cleaveTimer -= uiDiff; 
+                
+                if(whirlwindTimer < uiDiff) 
+                {
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_SAURFANG_WHIRLWIND);
+                    whirlwindTimer = 33000;  
+                }
+                else 
+                    whirlwindTimer -= uiDiff;
+                                                    
+                /*if(teryfingRoarTimer < uiDiff) 
+                {
+                    if(whirlwindTimer >= 18000) 
+                        teryfingRoarTimer = whirlwindTimer - 18000 + urand(0,6000);
+                    else
+                    {
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_SAURFANG_TERYFING_ROAR);
+                        teryfingRoarTimer = urand(18000, 24000);   
+                    }
+                }
+                else
+                    teryfingRoarTimer -= uiDiff;*/ 
+
+                //Teryfing roar somehow is making Varidus not be able to autoattack
+                
+
+                DoMeleeAttackIfReady();
+            }
+
+            else if(m_uiPhase == PHASE_FOUR)
+            {
+                switch(m_uiStep)
+                {
+                    case 1: //Get back to talk with Getry
+                        pCreature->SetWalk(false);                      
+                        pCreature->GetMotionMaster()->MovePoint(2, 3122.8056f, 6549.4526f, 79.422905f);
+                        Spacer();
+                        break;
+
+                    case 2:
+                        if(Creature* pGetry = GetClosestCreatureWithEntry(m_creature, SHADOWSTALKER_GETRY_ID, 100.0f))
+                            pCreature->SetFacingToObject(pGetry);
+                        NextStep(16*IN_MILLISECONDS);
+                        break;
+
+                    case 3:
+                        DoScriptText(ENKILAH_NECROLORD_SAY7, pCreature);
+                        NextStep(2*IN_MILLISECONDS);
+                        break;
+
+                    case 4:
+                        pCreature->GetMotionMaster()->MovePoint(3, ENKILAH_NECROLORD_SPAWN_COORDINATES[0],
+                            ENKILAH_NECROLORD_SPAWN_COORDINATES[1], ENKILAH_NECROLORD_SPAWN_COORDINATES[2]); 
+                        Spacer();
+                        break;
+
+                    case 5:
+                        pCreature->ForcedDespawn();
+                        break;
+                }
+            }
+		}
+		else 
+		{
+            if((m_uiPhase == PHASE_TWO) || (m_uiPhase == PHASE_THREE) || (m_uiPhase == PHASE_FOUR))
+			    m_uiStepTimer -= uiDiff;
+		}
+	}
+};
+
+CreatureAI* GetAI_npc_enkilah_necrolord(Creature* pCreature)
+{
+    return new npc_enkilah_necrolordAI(pCreature);
+}
+
+
+/*######
+##Varidus the Flenser
+######*/
+
+enum
+{
+    WARSONG_ABERATION_ID = 25625,
+
+    SPEL_RELEASE_ABERATION = 45805,
+    SPEL_SHADOW_NOVA = 32711,
+    SPEL_SHIELD_OF_SUFFERING = 50329,
+
+    VARIDUS_THE_FLENSER_SAY1 = -1999950,
+    VARIDUS_THE_FLENSER_SAY2 = -1999951,
+    VARIDUS_THE_FLENSER_SAY3 = -1999952,
+    VARIDUS_THE_FLENSER_SAY4 = -1999953,
+    VARIDUS_THE_FLENSER_SAY5 = -1999954,
+    VARIDUS_THE_FLENSER_SAY6 = -1999955,
+    VARIDUS_THE_FLENSER_SAY7 = -1999956,
+    VARIDUS_THE_FLENSER_SAY8 = -1999957,
+    VARIDUS_THE_FLENSER_SAY9 = -1999958,
+    VARIDUS_THE_FLENSER_SAY10 = -1999959,
+    VARIDUS_THE_FLENSER_SAY11 = -1999960,
+    VARIDUS_THE_FLENSER_SAY12 = -1999977,
+    VARIDUS_THE_FLENSER_SAY13 = -1999978,
+    VARIDUS_THE_FLENSER_SAY14 = -1999979,
+
+    INFESTED_PRISONER_COORDINATES_SIZE = 22
+};
+
+const float INFESTED_PRISONER_COORDINATES[INFESTED_PRISONER_COORDINATES_SIZE][3] =
+{
+    {3122.21f,6510.26f ,81.1079f },
+    {3116.76f,6524.07f ,80.9485f },
+    {3114.64f, 6501.5f ,81.7178f },
+    {3105.6f, 6534.98f, 80.9596f },
+    {3122.1f, 6518.81f, 80.8091f },
+    {3112.07f, 6511.91f, 81.4951f},
+    {3112.36f, 6527.99f, 80.9751f},
+    {3129.41f, 6511.59f, 80.8066f},
+    {3108.6f, 6531.9f, 80.9754f},
+    {3098.93f, 6517.5f, 81.875f},
+    {3093.04f, 6547.07f, 80.8595f},
+    {3116.41f, 6507.34f, 81.4439f},
+    {3093.24f, 6538.74f, 81.1652f},
+    {3104.28f, 6528.08f, 81.2888f},
+    {3099.79f, 6524.31f, 81.6106f},
+    {3096.96f, 6510.87f, 82.1854f},
+    {3093.88f, 6522.22f, 81.8956f},
+    {3102.45f, 6538.24f, 80.9342f},
+    {3103.04f, 6504.89f, 82.1467f},
+    {3126.8f, 6505.61f, 81.113f},
+    {3104.28f, 6519.58f, 81.6076f},
+    {3096.46f, 6535.53f, 81.2335f}
+};
+
+struct npc_varidus_the_flenserAI : public ScriptedAI
+{
+	uint8 m_uiStep;
+	uint8 m_uiPhase;
+	uint32 m_uiStepTimer;
+    uint16 m_uiShadowNovaTimer;
+    uint16 m_uiShieldOfSuferingTimer;
+	Player* pPlayer;
+    Creature* pGetry;
+    std::list<Creature*> abberationList;
+
+    npc_varidus_the_flenserAI(Creature *pCreature) : ScriptedAI(pCreature) 
+	{
+		m_uiStep = 0;
+		m_uiPhase = 0;
+		m_uiStepTimer = 0;
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        pGetry = 0;
+        m_uiShadowNovaTimer = 7000;
+        m_uiShieldOfSuferingTimer = 12000;
+	}
+
+    void Reset()
+    {
+        m_uiStep = 0;
+		m_uiPhase = 0;
+		m_uiStepTimer = 0;
+        pGetry = 0;   
+        abberationList.clear();
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+    }
+
+    void JustDied(Unit* pKiller)
+    {
+        pPlayer->KilledMonsterCredit(VARIDUS_ID);
+    }
+
+	void NextStep(uint32 Time = 0) // function for changing action steps and setting time between steps
+    {
+        m_uiStepTimer = Time;
+        m_uiStep++;
+    }
+
+	void Spacer()
+	{
+		m_uiStepTimer = 1000000; // setting large timer number this way creature will not make same action over again
+	}
+
+    void Kill(Unit* Oo)
+    {
+        Oo->DealDamage(Oo, Oo->GetMaxHealth() ,NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+    }
+
+    void setPhase(PHASES phase, uint32 stepTimer = 0)
+    {
+        m_uiStepTimer = stepTimer; 
+        m_uiStep = 1;
+        m_uiPhase = phase;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {        
+		if(m_uiStepTimer < uiDiff)
+		{
+            if(m_uiPhase == PHASE_ZERO)
+            {
+                switch(urand(0,2))
+                {
+                    case 0:
+                        DoScriptText( VARIDUS_THE_FLENSER_SAY12, m_creature);
+                        break;
+
+                    case 1:
+                        DoScriptText( VARIDUS_THE_FLENSER_SAY13, m_creature);
+                        break;
+
+                    case 2:
+                        DoScriptText( VARIDUS_THE_FLENSER_SAY14, m_creature);
+                        break;
+                }
+
+                m_uiStepTimer = 30000;
+            }
+
+			if(m_uiPhase == PHASE_TWO)  // First phase action block
+			{
+				switch(m_uiStep) 
+				{
+					case 1: //"SAY: Is this it? Is this all mighty horde..."
+                        m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+					    DoScriptText(VARIDUS_THE_FLENSER_SAY1, m_creature); 
+					    NextStep(2*IN_MILLISECONDS);
+					    break;
+
+					case 2:
+                        if(Creature* pGetry = GetClosestCreatureWithEntry(m_creature, SHADOWSTALKER_GETRY_ID, 100.0f))
+                            m_creature->SetFacingToObject(pGetry);  
+                        else
+                        {
+                            Reset();
+                            return;
+                        }
+					    NextStep(1*IN_MILLISECONDS);
+                        break;
+
+					case 3:  //"SAY: Pathetic!!"
+                        m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+					    DoScriptText(VARIDUS_THE_FLENSER_SAY2, m_creature); // Pathetic
+					    Spacer();
+					    break;
+
+					case 4:
+					    m_creature->HandleEmote(EMOTE_ONESHOT_SPELLCAST);
+					    NextStep(10*IN_MILLISECONDS);
+					    break;
+
+					case 5:  //SAY: i've never understood your type the hero
+                        m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+					    DoScriptText(VARIDUS_THE_FLENSER_SAY3, m_creature);
+                        NextStep(5*IN_MILLISECONDS);
+					    break;
+
+                    case 6: //SAY: why don't you let go?
+                        m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+					    DoScriptText(VARIDUS_THE_FLENSER_SAY4, m_creature); 
+                        NextStep(4*IN_MILLISECONDS);
+					    break;
+
+                    case 7: //SAY: Arthas can not be stoped accept it 
+                        m_creature->HandleEmote(EMOTE_ONESHOT_NO);
+					    DoScriptText(VARIDUS_THE_FLENSER_SAY5, m_creature); 
+                        NextStep(3*IN_MILLISECONDS);
+					    break;
+
+                    case 8: //SAY: This world is coming to an end, let it burn
+                        m_creature->HandleEmote(EMOTE_ONESHOT_POINT );
+                        DoScriptText(VARIDUS_THE_FLENSER_SAY6, m_creature); 
+                        NextStep(6*IN_MILLISECONDS);
+					    break;
+
+                    case 9:
+                        if(Creature* pNecroLord = GetClosestCreatureWithEntry(m_creature, ENKILAH_NECROLORD_ID, 100.0f))
+                            m_creature->SetFacingToObject(pNecroLord);                                                                              
+                        NextStep(1*IN_MILLISECONDS);
+                        break;
+
+                    case 10: //SAY: Take him and prepare for reanimation
+                        m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+                        DoScriptText(VARIDUS_THE_FLENSER_SAY7, m_creature); 
+                        NextStep(8*IN_MILLISECONDS);
+					    break;
+
+                    case 11: // SAY: Whats this now
+                        m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+                        DoScriptText(VARIDUS_THE_FLENSER_SAY8, m_creature); 
+                        NextStep(20*IN_MILLISECONDS);
+                        break;
+
+                    case 12: //SAY: Then you are a fool
+                        m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+                        DoScriptText(VARIDUS_THE_FLENSER_SAY9, m_creature); 
+                        NextStep(7*IN_MILLISECONDS);
+                        break;
+
+                    case 13:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_LAUGH);
+                        NextStep(3*IN_MILLISECONDS);
+                        break;
+
+                    case 14:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+                        DoScriptText(VARIDUS_THE_FLENSER_SAY10, m_creature);
+                        NextStep(2*IN_MILLISECONDS);
+                        break;
+
+                    case 15:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_POINT); 
+                        NextStep(2*IN_MILLISECONDS);
+                        break;
+
+                    case 16: 
+                        DoScriptText(VARIDUS_THE_FLENSER_SAY11, m_creature);
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); //makes Varidus attackable
+                        m_creature->RemoveAllAuras();
+
+                        while(Creature* pInfestedPrisoner = GetClosestCreatureWithEntry(m_creature, 25624, 200.0f))
+                        {
+                            Kill(pInfestedPrisoner);
+                        }
+
+                        for(int i=0; i<INFESTED_PRISONER_COORDINATES_SIZE; i++)
+                        { //Summon lots of aberations  
+                            abberationList.push_back(m_creature->SummonCreature(WARSONG_ABERATION_ID,INFESTED_PRISONER_COORDINATES[i][0],
+                                INFESTED_PRISONER_COORDINATES[i][1], INFESTED_PRISONER_COORDINATES[i][2],0,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 80000));
+                        }
+
+                        NextStep(2*IN_MILLISECONDS);
+                        break;
+
+
+                    case 17:
+                        if(Creature* pNecroLord = GetClosestCreatureWithEntry(m_creature, ENKILAH_NECROLORD_ID, 100.0f))
+                        {   
+                            std::list<Creature*>::iterator it;
+                    
+                            for(it = abberationList.begin(); it != abberationList.end(); it++)
+                            {
+                                (*it)->SetWalk(false);
+                                (*it)->AI()->AttackStart(pNecroLord);
+                            }
+                        }
+                        NextStep();
+                        break;
+
+                    case 18:  
+                        if(Creature* pNecroLord = GetClosestCreatureWithEntry(m_creature, ENKILAH_NECROLORD_ID, 100.0f))
+                        {
+                            AttackStart(pNecroLord);
+                            setPhase(PHASE_THREE);  
+                        }
+                        break;
+		        }
+			}
+            else if(m_uiPhase == PHASE_THREE)
+            {
+                if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                    return;
+
+                if(m_uiShadowNovaTimer < uiDiff) 
+                {                    
+                    DoCastSpellIfCan(m_creature, SPEL_SHADOW_NOVA);
+                    m_uiShadowNovaTimer = 12000;                    
+                }
+                else
+                    m_uiShadowNovaTimer -= uiDiff;
+
+                if(m_uiShieldOfSuferingTimer < uiDiff) 
+                {                    
+                    DoCastSpellIfCan(m_creature, SPEL_SHIELD_OF_SUFFERING);
+                    m_uiShieldOfSuferingTimer = 28000;                    
+                }
+                else
+                    m_uiShieldOfSuferingTimer -= uiDiff;
+               
+                DoMeleeAttackIfReady(); //TODO: What if Varidus would be taunted and taken away from battlefield?? :/
+                //TODO: Varidus sometimes get's buged in a battle
+            }
+		}
+		else 
+		{
+            if((m_uiPhase == PHASE_ZERO) || (m_uiPhase == PHASE_TWO) || (m_uiPhase == PHASE_THREE))
+			    m_uiStepTimer -= uiDiff;
+		}
+	}
+};
+
+CreatureAI* GetAI_npc_varidus_the_flenser(Creature* pCreature)
+{
+    return new npc_varidus_the_flenserAI(pCreature);
+}
+
+/*######
+##Shadowstalker Getry
+######*/
+enum
+{
+    QUEST_FOOLISH_ENDEAVORS = 11705,
+	WAYPOINT_QUANTITY = 11,
+    GESTRYS_DAGGERS_ID = 428,
+
+    SHADOWSTALKER_GETRY_SAY1 = -1999940,
+    SHADOWSTALKER_GETRY_SAY2 = -1999941,
+    SHADOWSTALKER_GETRY_SAY3 = -1999942,
+    SHADOWSTALKER_GETRY_SAY4 = -1999943,
+    SHADOWSTALKER_GETRY_SAY5 = -1999944
+
+};
+
+const float GETRY_WAYPOINTS[WAYPOINT_QUANTITY][3] =
+{
+    {3120.1799f, 6574.9199f, 97.868599f},
+    {3115.7080f, 6575.7163f, 97.977615f},
+    {3108.7746f, 6586.3958f, 91.500740f},
+	{3114.2470f, 6596.2807f, 91.339890f},
+	{3124.5117f, 6590.1328f, 91.379028f},
+	{3125.5366f, 6582.6499f, 88.812263f},
+	{3117.5932f, 6582.4340f, 86.207214f},
+	{3117.2939f, 6590.1330f, 83.417160f},
+	{3126.9267f, 6590.5400f, 79.770805f}, 
+	{3126.1733f, 6578.5327f, 77.960869f},
+	{3112.8618f, 6555.6508f, 79.744034f}
+};
+
+struct npc_shadowstalker_getryAI : public ScriptedAI
+{	
+	uint8 m_uiStep;
+	uint8 m_uiPhase;
+	uint32 m_uiStepTimer;
+    bool eventStarted;
+	Player* pPlayer;
+	Creature* Enkilah_Necrolord;
+    Creature* pVaridus;
+
+    npc_shadowstalker_getryAI(Creature *pCreature) : ScriptedAI(pCreature) 
+	{
+		m_uiStep = 1;
+		m_uiPhase = 0;
+		uint32 m_uiStepTimer = 0;
+        eventStarted = false;
+        Enkilah_Necrolord = 0;
+        pPlayer = 0;
+        pVaridus = 0;
+	}
+    
+    void Reset()
+    {
+        m_creature->SetWalk(true);
+        m_uiStep = 1;
+		m_uiPhase = 0;
+		m_uiStepTimer = 0;
+        Enkilah_Necrolord = 0;   
+        pVaridus = 0;
+        eventStarted = false;
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+    }
+    
+	void MovementInform(uint32 uiType, uint32 uiPointId) // function called at the end of some walk
+    {
+        NextStep();
+    }
+
+	 void NextStep(uint32 Time = 0) // function for changing action steps and setting time between steps
+    {
+        m_uiStepTimer = Time;
+        m_uiStep++;
+    }
+
+	void Spacer()
+	{
+		m_uiStepTimer = 1000000; // setting large timer number this way creature will not maek same action... 
+								// ...over and over again ... little bit ugly i know 
+	}
+
+    void setPhase(PHASES phase, uint32 stepTimer = 0)
+    {
+        m_uiStepTimer = stepTimer; 
+        m_uiStep = 1;
+        m_uiPhase = phase;
+    }
+
+    void StartEventForPlayer(Player* player)
+    {
+        if(!eventStarted)
+        {
+            this->pPlayer = player;
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            m_uiPhase = PHASE_ONE;
+            eventStarted = true;
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+		if(m_uiStepTimer < uiDiff)
+		{
+			if(m_uiPhase == PHASE_ONE)  // First phase action block
+			{
+				switch( m_uiStep) 
+				{
+					case 1:   //SAY: "lets go"
+					    DoScriptText(SHADOWSTALKER_GETRY_SAY1, m_creature); 
+					    NextStep(5*IN_MILLISECONDS);
+					    break;
+
+					case 2:  
+					    m_creature->GetMotionMaster()->MovePoint(1, GETRY_WAYPOINTS[1][0], GETRY_WAYPOINTS[1][1], GETRY_WAYPOINTS[1][2]);
+					    Spacer();
+					    break;
+
+					case 3: 
+					    m_creature->GetMotionMaster()->MovePoint(2, GETRY_WAYPOINTS[2][0], GETRY_WAYPOINTS[2][1], GETRY_WAYPOINTS[2][2]);
+					    Spacer();
+					    break;
+
+					case 4: 
+                        if(pPlayer)
+					        DoScriptText(SHADOWSTALKER_GETRY_SAY2, m_creature, pPlayer);
+
+					    m_creature->GetMotionMaster()->MovePoint(3, GETRY_WAYPOINTS[3][0], GETRY_WAYPOINTS[3][1], GETRY_WAYPOINTS[3][2]);
+					    Spacer();
+					    break;
+
+					case 5:
+					    m_creature->GetMotionMaster()->MovePoint(4, GETRY_WAYPOINTS[4][0], GETRY_WAYPOINTS[4][1], GETRY_WAYPOINTS[4][2]);
+					    Spacer();
+					    break;
+
+					case 6:
+					    m_creature->GetMotionMaster()->MovePoint(5, GETRY_WAYPOINTS[5][0], GETRY_WAYPOINTS[5][1], GETRY_WAYPOINTS[5][2]);
+					    Spacer();
+					    break;
+
+					case 7:
+					    m_creature->GetMotionMaster()->MovePoint(6, GETRY_WAYPOINTS[6][0], GETRY_WAYPOINTS[6][1], GETRY_WAYPOINTS[6][2]);
+					    Spacer();
+					    break;
+
+					case 8:
+					    m_creature->GetMotionMaster()->MovePoint(7, GETRY_WAYPOINTS[7][0], GETRY_WAYPOINTS[7][1], GETRY_WAYPOINTS[7][2]);
+					    Spacer();
+					    break;
+
+					case 9:
+					    m_creature->GetMotionMaster()->MovePoint(8, GETRY_WAYPOINTS[8][0], GETRY_WAYPOINTS[8][1], GETRY_WAYPOINTS[8][2]);
+					    Spacer();
+					    break;
+
+					case 10:
+					    m_creature->GetMotionMaster()->MovePoint(9, GETRY_WAYPOINTS[9][0], GETRY_WAYPOINTS[9][1], GETRY_WAYPOINTS[9][2]);
+					    Spacer();
+					    break;
+
+					case 11:  // Getry is turning on stealth
+					    DoCast(m_creature,34189);
+					    NextStep(0.1*IN_MILLISECONDS);
+					    break;       
+
+					case 12: // Getry is sneaking up to attack Varidus here 
+					    m_creature->GetMotionMaster()->MovePoint(10, GETRY_WAYPOINTS[10][0], GETRY_WAYPOINTS[10][1], GETRY_WAYPOINTS[10][2]);
+					    if(pVaridus = GetClosestCreatureWithEntry(m_creature, 25618, 200.0f)) 
+					    {  
+						    npc_varidus_the_flenserAI* pVaridusAI = dynamic_cast<npc_varidus_the_flenserAI*>(pVaridus->AI()); // need pointer to start second phase 
+							
+                            pVaridusAI->setPhase(PHASE_TWO, 6*IN_MILLISECONDS);
+
+						    pVaridusAI->pPlayer = pPlayer;
+                            pVaridusAI->pGetry = m_creature;
+
+                            Spacer();
+					    }
+                        else
+                            setPhase(PHASE_FIVE);
+                        
+					    break;
+
+					
+					case 13: 
+                        setPhase(PHASE_TWO);
+					    break;
+				} 
+			}
+
+			else if(m_uiPhase == PHASE_TWO)
+			{
+				switch(m_uiStep)
+				{
+					case 1:
+					    if(pVaridus) 
+					    {
+						    npc_varidus_the_flenserAI* pVaridusAI = dynamic_cast<npc_varidus_the_flenserAI*>(pVaridus->AI()); 
+						    pVaridusAI->NextStep();
+					    }
+                        // Summon enk'ilah Necrolord
+					    Enkilah_Necrolord =  m_creature->SummonCreature(ENKILAH_NECROLORD_ID, 
+					    ENKILAH_NECROLORD_SPAWN_COORDINATES[0], ENKILAH_NECROLORD_SPAWN_COORDINATES[1],
+					    ENKILAH_NECROLORD_SPAWN_COORDINATES[2], 0, TEMPSUMMON_TIMED_DESPAWN, 10000000);
+
+                        if(Enkilah_Necrolord)
+                        {
+                            npc_enkilah_necrolordAI* pNecrolordAI = dynamic_cast<npc_enkilah_necrolordAI*>(Enkilah_Necrolord->AI());
+                            pNecrolordAI->pPlayer = pPlayer;
+                            pNecrolordAI->NextStep(1*IN_MILLISECONDS);
+                        }
+                    
+					    NextStep(0.6*IN_MILLISECONDS);
+					    break;
+
+					case 2:
+					    DoCast(m_creature, 45922);			// since shadow prison is only self cast, player and 
+					    m_creature->RemoveAllAuras();		// Getry must cast it on them selfs
+                        if(pPlayer)
+					        pPlayer->CastSpell(pPlayer, 45922, false);
+				        NextStep(2*IN_MILLISECONDS);
+					    break;	
+
+                    case 3:
+                        if(!m_creature->HasAura(45922)) 
+                        {
+                            m_creature->LoadEquipment(GESTRYS_DAGGERS_ID);
+                            
+                            if(Creature* pVaridus = GetClosestCreatureWithEntry(m_creature, 25618, 100.0f)) 
+                                AttackStart(pVaridus);
+
+                            setPhase(PHASE_THREE);
+                        } 
+                        else
+                        {
+                            m_uiStepTimer = 1000;
+                        }                   
+                    break;
+		        }
+    
+			} 
+            else if(m_uiPhase == PHASE_THREE)
+			{
+                if(GetClosestCreatureWithEntry(m_creature, VARIDUS_ID, 200.0f) == 0)
+                {
+                    setPhase(PHASE_FOUR);
+                    return;
+                }
+                else
+                    DoMeleeAttackIfReady();
+            }
+            else if(m_uiPhase == PHASE_FOUR)
+            {
+                switch(m_uiStep)
+                {
+                    case 1:
+                        m_creature->LoadEquipment(0, true);
+                        m_creature->SetWalk(false);
+                        m_creature->GetMotionMaster()->MovePoint(10, GETRY_WAYPOINTS[10][0], GETRY_WAYPOINTS[10][1], GETRY_WAYPOINTS[10][2]);
+                        Spacer();
+                        break;
+
+                    case 2:
+                        NextStep(3*IN_MILLISECONDS);
+                        break;
+
+                    case 3:
+                        if(Creature* pNecroLord = GetClosestCreatureWithEntry(m_creature,ENKILAH_NECROLORD_ID , 200.0f)) 
+                        {
+                            m_creature->SetFacingToObject(pNecroLord);
+                        }
+                        else
+                        {
+                            setPhase(PHASE_FIVE);
+                            return;
+                        }
+                        NextStep(2*IN_MILLISECONDS);
+                        break;
+
+                    case 4:
+                        DoScriptText(SHADOWSTALKER_GETRY_SAY3, m_creature);
+                        m_creature->HandleEmote(EMOTE_ONESHOT_BOW);
+                        NextStep(5*IN_MILLISECONDS);
+                        break;
+
+                    case 5:
+                        DoScriptText(SHADOWSTALKER_GETRY_SAY4, m_creature);
+                        NextStep(9*IN_MILLISECONDS);
+                        break;
+
+                    case 6:
+                        DoScriptText(SHADOWSTALKER_GETRY_SAY5, m_creature);
+                        m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
+                        NextStep(7*IN_MILLISECONDS);
+                        break;
+
+                    case 7:
+                        setPhase(PHASE_FIVE);
+                        break;                   
+                }
+            }
+            else if(m_uiPhase == PHASE_FIVE)
+            {
+                switch(m_uiStep)
+                {
+                    case 1:
+                        m_creature->SetWalk(false);
+					    m_creature->GetMotionMaster()->MovePoint(11, GETRY_WAYPOINTS[9][0], GETRY_WAYPOINTS[9][1], GETRY_WAYPOINTS[9][2]);
+					    Spacer();
+					    break;
+
+                    case 2:
+					    m_creature->GetMotionMaster()->MovePoint(12, GETRY_WAYPOINTS[8][0], GETRY_WAYPOINTS[8][1], GETRY_WAYPOINTS[8][2]);
+					    Spacer();
+					    break;
+
+                    case 3:
+					    m_creature->GetMotionMaster()->MovePoint(13, GETRY_WAYPOINTS[7][0], GETRY_WAYPOINTS[7][1], GETRY_WAYPOINTS[7][2]);
+					    Spacer();
+					    break;
+
+                    case 4:
+					    m_creature->GetMotionMaster()->MovePoint(14, GETRY_WAYPOINTS[6][0], GETRY_WAYPOINTS[6][1], GETRY_WAYPOINTS[6][2]);
+					    Spacer();
+					    break;
+
+                    case 5:
+					    m_creature->GetMotionMaster()->MovePoint(15, GETRY_WAYPOINTS[5][0], GETRY_WAYPOINTS[5][1], GETRY_WAYPOINTS[5][2]);
+					    Spacer();
+					    break;
+
+                    case 6:
+					    m_creature->GetMotionMaster()->MovePoint(16, GETRY_WAYPOINTS[4][0], GETRY_WAYPOINTS[4][1], GETRY_WAYPOINTS[4][2]);
+					    Spacer();
+					    break;
+
+                    case 7:
+					    m_creature->GetMotionMaster()->MovePoint(17, GETRY_WAYPOINTS[3][0], GETRY_WAYPOINTS[3][1], GETRY_WAYPOINTS[3][2]);
+					    Spacer();
+					    break;
+
+                    case 8: 
+					    m_creature->GetMotionMaster()->MovePoint(18, GETRY_WAYPOINTS[2][0], GETRY_WAYPOINTS[2][1], GETRY_WAYPOINTS[2][2]);
+					    Spacer();
+					    break;
+
+                    case 9:  
+					    m_creature->GetMotionMaster()->MovePoint(19, GETRY_WAYPOINTS[1][0], GETRY_WAYPOINTS[1][1], GETRY_WAYPOINTS[1][2]);
+					    Spacer();
+					    break;
+                        
+                    case 10:
+                        pVaridus->Respawn();
+                        m_creature->AI()->EnterEvadeMode();
+                        break;
+                }
+            }
+		}
+		else
+		{
+            if((m_uiPhase == PHASE_ONE) || (m_uiPhase == PHASE_TWO) || (m_uiPhase == PHASE_THREE) || (m_uiPhase == PHASE_FOUR) || (m_uiPhase == PHASE_FIVE))
+			    m_uiStepTimer -= uiDiff;
+		}
+    }
+};
+
+CreatureAI* GetAI_npc_shadowstalker_getry(Creature* pCreature)
+{
+    return new npc_shadowstalker_getryAI(pCreature);
+}
+
+bool QuestAccept_npc_shadowstalker_getry(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_FOOLISH_ENDEAVORS)
+    {
+		if (npc_shadowstalker_getryAI* pGetryAI = dynamic_cast<npc_shadowstalker_getryAI*>(pCreature->AI()))
+		{
+            if(Creature* pVaridus = GetClosestCreatureWithEntry(pCreature, VARIDUS_ID, 100.0f))
+            {
+                if(pVaridus->isAlive())
+                    pGetryAI->StartEventForPlayer(pPlayer);                                           
+            }
+		}
+    }
+
+    return true;
+}
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript;
@@ -1944,5 +2964,21 @@ void AddSC_borean_tundra()
     pNewScript = new Script;
     pNewScript->Name = "npc_seaforium_depth_charge";
     pNewScript->GetAI = &GetAI_npc_seaforium_depth_charge;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_enkilah_necrolord";
+    pNewScript->GetAI = &GetAI_npc_enkilah_necrolord;
+    pNewScript->RegisterSelf();
+
+	pNewScript = new Script;
+    pNewScript->Name = "npc_shadowstalker_getry";
+    pNewScript->GetAI = &GetAI_npc_shadowstalker_getry;
+	pNewScript->pQuestAcceptNPC = &QuestAccept_npc_shadowstalker_getry;
+    pNewScript->RegisterSelf();
+
+	pNewScript = new Script;
+    pNewScript->Name = "npc_varidus_the_flenser";
+    pNewScript->GetAI = &GetAI_npc_varidus_the_flenser;
     pNewScript->RegisterSelf();
 }

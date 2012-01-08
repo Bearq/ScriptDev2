@@ -561,12 +561,15 @@ struct MANGOS_DLL_DECL mob_gluttonous_abominationAI : public ScriptedAI
     }
 
     uint32 m_uiGutSprayTimer;
-    bool m_bIsRotWormsCast;
 
     void Reset()
     {
         m_uiGutSprayTimer = urand(3000, 5000);
-        m_bIsRotWormsCast = false;
+    }
+
+    void JustDied(Unit *pKiller)
+    {
+        DoCastSpellIfCan(m_creature, SPELL_ROT_WORM_SPAWNER, CAST_TRIGGERED);
     }
 
     void JustSummoned(Creature *pCreature)
@@ -579,16 +582,6 @@ struct MANGOS_DLL_DECL mob_gluttonous_abominationAI : public ScriptedAI
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
-
-        // Rot Worms
-        if (!m_bIsRotWormsCast)
-        {
-            if (m_creature->GetHealthPercent() <= 30.0f)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_ROT_WORM_SPAWNER, CAST_TRIGGERED) == CAST_OK)
-                    m_bIsRotWormsCast = true;
-            }
-        }
 
         // Gut Spray
         if (m_uiGutSprayTimer <= uiDiff)

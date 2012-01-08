@@ -220,6 +220,39 @@ struct MANGOS_DLL_DECL base_icc_bossAI : public ScriptedAI
 
     void Reset(){}
     void UpdateAI(const uint32 uiDiff){}
+
+    Unit* SelectRandomRangedTarget(Unit *pSource)
+    {
+        Unit *pResult = NULL;
+        std::list<Unit*> lTargets;
+        ThreatList const& tList = m_creature->getThreatManager().getThreatList();
+
+        for (ThreatList::const_iterator i = tList.begin();i != tList.end(); ++i)
+        {
+            if (!(*i)->getUnitGuid().IsPlayer())
+                continue;
+
+            if (Unit* pTmp = m_creature->GetMap()->GetUnit((*i)->getUnitGuid()))
+                lTargets.push_back(pTmp);
+        }
+
+        if (!lTargets.empty())
+        {
+            uint8 max = m_bIs25Man ? 8 : 3;
+            std::list<Unit*>::iterator iter;
+
+            lTargets.sort(ObjectDistanceOrderReversed(pSource));
+            iter = lTargets.begin();
+
+            if (max >= lTargets.size())
+                max = lTargets.size() - 1;
+
+            std::advance(iter, urand(0, max));
+            pResult = (*iter);
+        }
+
+        return pResult;
+    }
 };
 
 enum AchievementCriteriaIds

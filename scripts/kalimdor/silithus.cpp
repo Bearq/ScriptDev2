@@ -234,6 +234,176 @@ bool GossipSelect_npcs_rutgar_and_frankal(Player* pPlayer, Creature* pCreature, 
     return true;
 }
 
+/*******************
+**Lesser Wind Stone
+********************/
+#define GOSSIP_ITEM_1 "I am not cultist, you monster! Come to me and face yout destruction!"
+#define GOSSIP_ITEM_2 "You will listen to this, wille duke! I am not your Twillight's Hammer lapdog! I am here to challenge you! Come! Come, and meet your death..."
+#define GOSSIP_ITEM_3 "The day of judgement has come, friend! I challenge you, no battle!"
+
+#define GOSSIP_TEXT_1 "A faint whisper is heard form within the stone... Greetings, little one. Do you have news for the Templar?"
+#define GOSSIP_TEXT_2 "A clear voice rises form within the stone...You come to us with litle and so we will listen, but do not try our patience. The council has no time for idle gossip from one such as you."
+#define GOSSIP_TEXT_3 "A thunderous voice bellows form the stone... Greetings, commander. What news of Sillithus do you bring the Lords of the Council?"
+
+enum
+{
+    //Lesser Wind Stone
+    NPC_HOARY_TEMPLAR       = 15212,
+    NPC_CRIMSON_TEMPLAR     = 15209,
+    NPC_EARTHEN_TEMPLAR     = 15307,
+    NPC_AZURE_TEMPLAR       = 15211,
+
+    //Wind Stone
+    NPC_DUKE_CYNDERS        = 15206,
+    NPC_DUKE_FATHOMS        = 15207,
+    NPC_DUKE_SHARDS         = 15208,
+    NPC_DUKE_ZEPHYRS        = 15220,
+
+    //Great Wind Stone
+    NPC_LORD                = 15305,
+    NPC_PRINCE              = 15203,
+    NPC_BARON               = 15205,
+    NPC_MARSHAL             = 15204,
+
+    SPELL_TEMPLAR_RANDOM    = 24745,
+    SPELL_DUKE_RANDOM       = 24763,    
+    SPELL_ROYAL_RANDOM      = 24784, 
+    SPELL_ARCANE_LIGHT      = 52921,    //When player dont have all items
+
+    GO_LESSER_WIND_STONE    = 180456,
+    GO_WIND_STONE           = 180461,
+    GO_GREATH_WIND_STONE    = 180466,
+
+    ITEM_MANTLE             = 20406,
+    ITEM_COWL               = 20408,
+    ITEM_ROBE               = 20407,
+    ITEM_MEDALION           = 20422,
+    ITEM_RING               = 20451,
+};
+
+bool GOGossipHello_go_lesser_wind_stone(Player* pPlayer,  GameObject* pGo)
+{
+    //pPlayer->CastSpell(pPlayer, SPELL_ARCANE_LIGHT, true);
+
+    if(pPlayer->HasItemOrGemWithIdEquipped(ITEM_MANTLE, 1) && pPlayer->HasItemOrGemWithIdEquipped(ITEM_COWL, 1) && pPlayer->HasItemOrGemWithIdEquipped(ITEM_ROBE, 1))
+    {
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        pPlayer->SEND_GOSSIP_MENU(100001, pGo->GetObjectGuid());
+    }
+
+    return true;
+}
+
+bool GOGossipSelect_go_lesser_wind_stone(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction)
+{
+    pPlayer->CLOSE_GOSSIP_MENU();
+
+    switch(urand(0, 3))
+    {
+        case 0:
+            pPlayer->CastSpell(pPlayer, SPELL_TEMPLAR_RANDOM, false);
+            pPlayer->SummonCreature(NPC_HOARY_TEMPLAR, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+        case 1:
+            pPlayer->CastSpell(pPlayer, SPELL_TEMPLAR_RANDOM, false);
+            pPlayer->SummonCreature(NPC_CRIMSON_TEMPLAR, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+        case 2:
+            pPlayer->CastSpell(pPlayer, SPELL_TEMPLAR_RANDOM, false);
+            pPlayer->SummonCreature(NPC_EARTHEN_TEMPLAR, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+        case 3:
+            pPlayer->CastSpell(pPlayer, SPELL_TEMPLAR_RANDOM, false);
+            pPlayer->SummonCreature(NPC_AZURE_TEMPLAR, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+    }
+    return true;
+}
+
+/************
+**Wind Stone
+*************/
+bool GOGossipHello_go_wind_stone(Player* pPlayer, GameObject* pGo)
+{
+    //pPlayer->CastSpell(pPlayer, SPELL_ARCANE_LIGHT, true);
+
+    if(pPlayer->HasItemOrGemWithIdEquipped(ITEM_MANTLE, 1) && pPlayer->HasItemOrGemWithIdEquipped(ITEM_COWL, 1) && pPlayer->HasItemOrGemWithIdEquipped(ITEM_ROBE, 1) && pPlayer->HasItemOrGemWithIdEquipped(ITEM_MEDALION, 1))
+    {
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        pPlayer->SEND_GOSSIP_MENU(100001, pGo->GetObjectGuid());
+    }
+
+    return true;
+}
+
+bool GOGossipSelect_go_wind_stone(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction)
+{
+    pPlayer->CLOSE_GOSSIP_MENU();
+    switch(urand(0, 3))
+    {
+        case 0:
+            pPlayer->CastSpell(pPlayer, SPELL_DUKE_RANDOM, false);
+            pPlayer->SummonCreature(NPC_DUKE_CYNDERS, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+        case 1:
+            pPlayer->CastSpell(pPlayer, SPELL_DUKE_RANDOM, false);
+            pPlayer->SummonCreature(NPC_DUKE_FATHOMS, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+        case 2:
+            pPlayer->CastSpell(pPlayer, SPELL_DUKE_RANDOM, false);
+            pPlayer->SummonCreature(NPC_DUKE_SHARDS, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+        case 3:
+            pPlayer->CastSpell(pPlayer, SPELL_DUKE_RANDOM, false);
+            pPlayer->SummonCreature(NPC_DUKE_ZEPHYRS, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+    }
+    return true;
+}
+
+/******************
+**Great Wind Stone
+*******************/
+bool GOGossipHello_go_great_wind_stone(Player* pPlayer, GameObject* pGo)
+{
+    //pPlayer->CastSpell(pPlayer, SPELL_ARCANE_LIGHT, true);
+
+    if(pPlayer->HasItemOrGemWithIdEquipped(ITEM_MANTLE, 1) && pPlayer->HasItemOrGemWithIdEquipped(ITEM_COWL, 1) && pPlayer->HasItemOrGemWithIdEquipped(ITEM_ROBE, 1) && pPlayer->HasItemOrGemWithIdEquipped(ITEM_MEDALION, 1) && pPlayer->HasItemOrGemWithIdEquipped(ITEM_RING, 1))
+    {
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        pPlayer->SEND_GOSSIP_MENU(100001, pGo->GetObjectGuid());
+    }
+
+    return true;
+}
+
+bool GOGossipSelect_go_great_wind_stone(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction)
+{
+    pPlayer->CLOSE_GOSSIP_MENU();
+
+    switch(urand(0, 3))
+    {
+        case 0:
+            pPlayer->CastSpell(pPlayer, SPELL_ROYAL_RANDOM, false);
+            pGo->SummonCreature(NPC_LORD, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+        case 1:
+            pPlayer->CastSpell(pPlayer, SPELL_ROYAL_RANDOM, false);
+            pGo->SummonCreature(NPC_PRINCE, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+        case 2:
+            pPlayer->CastSpell(pPlayer, SPELL_ROYAL_RANDOM, false);
+            pGo->SummonCreature(NPC_BARON, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+        case 3:
+            pPlayer->CastSpell(pPlayer, SPELL_ROYAL_RANDOM, false);
+            pGo->SummonCreature(NPC_MARSHAL, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            break;
+    }
+
+    return true;
+}
+
 void AddSC_silithus()
 {
     Script *newscript;
@@ -248,5 +418,23 @@ void AddSC_silithus()
     newscript->Name = "npcs_rutgar_and_frankal";
     newscript->pGossipHello =  &GossipHello_npcs_rutgar_and_frankal;
     newscript->pGossipSelect = &GossipSelect_npcs_rutgar_and_frankal;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "go_lesser_wind_stone";
+    newscript->pGossipHelloGO  = &GOGossipHello_go_lesser_wind_stone;
+    newscript->pGossipSelectGO = &GOGossipSelect_go_lesser_wind_stone;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "go_wind_stone";
+    newscript->pGossipHelloGO  = &GOGossipHello_go_wind_stone;
+    newscript->pGossipSelectGO = &GOGossipSelect_go_wind_stone;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "go_great_wind_stone";
+    newscript->pGossipHelloGO  = &GOGossipHello_go_great_wind_stone;
+    newscript->pGossipSelectGO = &GOGossipSelect_go_great_wind_stone;
     newscript->RegisterSelf();
 }

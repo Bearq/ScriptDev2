@@ -99,6 +99,7 @@ enum
     GO_WEST_PORTCULLIS          = 195589,
     GO_SOUTH_PORTCULLIS         = 195590,
     GO_NORTH_PORTCULLIS         = 195591,
+	GO_WEB_DOOR                 = 195485,   //Anub'arak Door
 
     TYPE_DIFFICULTY             = 101,
     TYPE_EVENT_TIMER            = 102,

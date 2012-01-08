@@ -97,22 +97,12 @@ static Locations SpawnLoc[]=
     {4391.38f, 3163.71f, 389.40f, 5.8f}                 // rotface side
 };
 
-struct MANGOS_DLL_DECL boss_festergutAI : public ScriptedAI
+struct MANGOS_DLL_DECL boss_festergutAI : public base_icc_bossAI
 {
-    boss_festergutAI(Creature *pCreature) : ScriptedAI(pCreature)
+    boss_festergutAI(Creature *pCreature) : base_icc_bossAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_uiMapDifficulty = pCreature->GetMap()->GetDifficulty();
-        m_bIsHeroic = m_uiMapDifficulty > RAID_DIFFICULTY_25MAN_NORMAL;
-        m_bIs25Man = (m_uiMapDifficulty == RAID_DIFFICULTY_25MAN_NORMAL || m_uiMapDifficulty == RAID_DIFFICULTY_25MAN_HEROIC);
-
         Reset();
     }
-
-    ScriptedInstance *m_pInstance;
-    Difficulty m_uiMapDifficulty;
-    bool m_bIsHeroic;
-    bool m_bIs25Man;
 
     uint32 m_uiBerserkTimer;
     uint32 m_uiGastricBloatTimer;
@@ -147,7 +137,7 @@ struct MANGOS_DLL_DECL boss_festergutAI : public ScriptedAI
 
             if (Creature *pProfessor = m_pInstance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
             {
-                pProfessor->NearTeleportTo(SpawnLoc[m_bIsHeroic ? 1 : 0].x, SpawnLoc[m_bIsHeroic ? 1 : 0].y, SpawnLoc[m_bIsHeroic ? 1 : 0].z, SpawnLoc[m_bIsHeroic ? 1 : 0].o);
+                pProfessor->NearTeleportTo(SpawnLoc[1].x, SpawnLoc[1].y, SpawnLoc[1].z, SpawnLoc[1].o);
                 pProfessor->SetInCombatWithZone();
             }
         }
@@ -183,39 +173,6 @@ struct MANGOS_DLL_DECL boss_festergutAI : public ScriptedAI
 
         DoScriptText(SAY_DEATH, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_REMOVE_INOCULENT, CAST_TRIGGERED);
-    }
-
-    Unit* SelectRandomRangedTarget(Unit *pSource)
-    {
-        Unit *pResult = NULL;
-        std::list<Unit*> lTargets;
-        ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-
-        for (ThreatList::const_iterator i = tList.begin();i != tList.end(); ++i)
-        {
-            if (!(*i)->getUnitGuid().IsPlayer())
-                continue;
-
-            if (Unit* pTmp = m_creature->GetMap()->GetUnit((*i)->getUnitGuid()))
-                lTargets.push_back(pTmp);
-        }
-
-        if (!lTargets.empty())
-        {
-            uint8 max = m_bIs25Man ? 8 : 3;
-            std::list<Unit*>::iterator iter;
-
-            lTargets.sort(ObjectDistanceOrderReversed(pSource));
-            iter = lTargets.begin();
-
-            if (max >= lTargets.size())
-                max = lTargets.size() - 1;
-
-            std::advance(iter, urand(0, max));
-            pResult = (*iter);
-        }
-
-        return pResult;
     }
 
     void UpdateAI(const uint32 uiDiff)

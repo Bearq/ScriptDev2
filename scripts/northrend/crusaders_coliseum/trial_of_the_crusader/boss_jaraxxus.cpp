@@ -117,7 +117,7 @@ struct MANGOS_DLL_DECL boss_jaraxxusAI : public BSWScriptedAI
         m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
         m_uiNetherPowerTimer = 20*IN_MILLISECONDS;
         m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
-        m_uiTouchOfJaraxxusTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
+        m_uiTouchOfJaraxxusTimer = urand(30*IN_MILLISECONDS, 35*IN_MILLISECONDS);
         m_uiSummonTimer = 1*MINUTE*IN_MILLISECONDS;
         m_uiBerserkTimer = 6*MINUTE*IN_MILLISECONDS;
 
@@ -173,7 +173,7 @@ struct MANGOS_DLL_DECL boss_jaraxxusAI : public BSWScriptedAI
                     }
                 }
             }
-            m_uiNetherPowerTimer = urand(45*IN_MILLISECONDS, 60*IN_MILLISECONDS);
+            m_uiNetherPowerTimer = urand(25*IN_MILLISECONDS, 40*IN_MILLISECONDS);
         }else m_uiNetherPowerTimer -= uiDiff;
 
         if(m_uiFelFireballTimer <= uiDiff)
@@ -238,7 +238,8 @@ struct MANGOS_DLL_DECL boss_jaraxxusAI : public BSWScriptedAI
             m_uiBerserkTimer = 6*MINUTE*IN_MILLISECONDS;
         }else m_uiBerserkTimer -= uiDiff;
 
-        if(m_bIsHeroicMode)
+        //SPELL IS NOT WORK!!
+        /*if(m_bIsHeroicMode)
         {
             if (m_uiTouchOfJaraxxusTimer <= uiDiff)
             {
@@ -246,9 +247,9 @@ struct MANGOS_DLL_DECL boss_jaraxxusAI : public BSWScriptedAI
                 {
                     DoCastSpellIfCan(pTarget, SPELL_TOUCH_OF_JARAXXUS);
                 }
-                m_uiTouchOfJaraxxusTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
+                m_uiTouchOfJaraxxusTimer = urand(30*IN_MILLISECONDS, 35*IN_MILLISECONDS);
             }else m_uiTouchOfJaraxxusTimer -= uiDiff;
-        }
+        }*/
 
         DoMeleeAttackIfReady();
     }

@@ -288,19 +288,6 @@ switch(uiAction) {
            pGoFloor->SetUInt32Value(GAMEOBJECT_BYTES_1,8449);
            }
            pCreature->CastSpell(pCreature,69016,false);
-
-           Creature* pTemp = pInstance->GetSingleCreatureFromStorage(NPC_ANUBARAK);
-           if (!pTemp || !pTemp->isAlive())
-                         pCreature->SummonCreature(NPC_ANUBARAK, SpawnLoc[19].x, SpawnLoc[19].y, SpawnLoc[19].z, 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
-           if (pTemp) {
-                        pTemp->GetMotionMaster()->MovePoint(0, SpawnLoc[20].x, SpawnLoc[20].y, SpawnLoc[20].z);
-                        pTemp->SetWalk(true);
-                        pTemp->SetInCombatWithZone();
-                        }
-           pInstance->SetData(TYPE_STAGE,9);
-           pInstance->SetData(TYPE_ANUBARAK,IN_PROGRESS);
-           if (pCreature->GetVisibility() == VISIBILITY_ON)
-                   pCreature->SetVisibility(VISIBILITY_OFF);
     break;
     };
 
@@ -462,17 +449,8 @@ struct MANGOS_DLL_DECL boss_lich_king_tocAI : public ScriptedAI
                    pGoFloor->SetUInt32Value(GAMEOBJECT_BYTES_1,8449);
                    }
                 m_creature->CastSpell(m_creature,69016,false);
-                if(pInstance) pInstance->SetData(TYPE_LICH_KING,DONE);
-
-               pInstance->SetData(TYPE_ANUBARAK,IN_PROGRESS);
-                  m_creature->SummonCreature(NPC_ANUBARAK, SpawnLoc[19].x, SpawnLoc[19].y, SpawnLoc[19].z, 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
-                  if (Creature* pTemp = pInstance->GetSingleCreatureFromStorage(NPC_ANUBARAK)) {
-                                pTemp->GetMotionMaster()->MovePoint(0, SpawnLoc[20].x, SpawnLoc[20].y, SpawnLoc[20].z);
-                                pTemp->SetWalk(true);
-                                pTemp->SetInCombatWithZone();
-                                }
+               if(pInstance) pInstance->SetData(TYPE_LICH_KING,DONE);
                pInstance->SetData(TYPE_STAGE,9);
-               Event=false;
                m_creature->ForcedDespawn();
                 if (Creature* pPortal = GetCreatureFromGuid(m_uiPortalGuid))
                     pPortal->ForcedDespawn();

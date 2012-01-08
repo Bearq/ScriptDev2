@@ -493,11 +493,11 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
         }else m_uiEyebeam_Timer -= uiDiff;
 
 		// respawn arms
-        if (m_uiRespawnLeftTimer < uiDiff && m_bIsLeftDead)
+        // needs new implementation!
+        /*if (m_uiRespawnLeftTimer < uiDiff && m_bIsLeftDead)
         {
             if (VehicleKit *pVehKit = m_creature->GetVehicleKit())
             {
-                pVehKit->InstallAccessory(NPC_LEFT_ARM, 0, true);
                 m_bIsLeftDead   = false;
                 DoScriptText(EMOTE_ARM_LEFT, m_creature);
             }
@@ -507,11 +507,10 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
         {
             if (VehicleKit *pVehKit = m_creature->GetVehicleKit())
             {
-                pVehKit->InstallAccessory(NPC_RIGHT_ARM, 1, true);
                 m_bIsRightDead  = false;
                 DoScriptText(EMOTE_ARM_RIGHT, m_creature);
             }
-        }else m_uiRespawnRightTimer -= uiDiff;
+        }else m_uiRespawnRightTimer -= uiDiff;*/
 
 		// check if arms are dead and if there is no player in melee range
         if (m_uiCheck_Timer < uiDiff)

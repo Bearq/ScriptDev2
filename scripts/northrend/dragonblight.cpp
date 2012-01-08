@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Dragonblight
 SD%Complete: 100
-SDComment: Quest support: 12499/12500(end sequenze) 12161, 12266, 12470 . Taxi paths Wyrmrest temple.
+SDComment: Quest support: 12499/12500(end sequenze) 12161, 12266, 12274, 12470 . Taxi paths Wyrmrest temple.
 SDCategory: Dragonblight
 EndScriptData */
 
@@ -29,6 +29,7 @@ npc_tariolstrasz
 npc_torastrasza
 npc_taunkale_refugee
 npc_hourglass_of_eternity
+npc_high_abbot
 EndContentData */
 
 #include "precompiled.h"
@@ -1034,6 +1035,197 @@ CreatureAI* GetAI_npc_warsong_battle_standart(Creature* pCreature)
     return new npc_warsong_battle_standartAI(pCreature);
 }
 
+#define GOSSIP_ITEM_1 "I am ready, your grace. <kiss the ring>"
+
+enum
+{
+    SAY_ABBOT_1             = -1658082,
+    SAY_ABBOT_2             = -1658083,
+    SAY_ABBOT_3             = -1658084,
+    SAY_ABBOT_4             = -1658085,
+    SAY_ABBOT_5             = -1658086,
+
+    NPC_ABBOT               = 27444,
+    QUEST_A_FALL_FOR_GRACE  = 12274,
+};
+
+/************
+**npc_high_abbot
+*************/
+struct MANGOS_DLL_DECL npc_high_abbotAI : public ScriptedAI
+{
+    npc_high_abbotAI(Creature* pCreature) : ScriptedAI(pCreature)
+    { 
+        Reset(); 
+    }
+
+    bool m_bIsEvent;
+
+    uint8 m_uiEvent;
+    uint32 m_uiEventTimer;
+
+    void Reset() 
+    {
+        m_uiEvent = 0;
+        m_uiEventTimer = 10000;
+        m_bIsEvent = true;
+
+        m_creature->SetRespawnDelay(HOUR);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);        
+    }
+
+    Unit* SearchPlayer()
+    {
+        Map::PlayerList const &PlayerList = m_creature->GetMap()->GetPlayers();
+
+        for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+        {
+            Player* pPlayer = itr->getSource();
+            if (pPlayer && pPlayer->GetQuestStatus(QUEST_A_FALL_FOR_GRACE) == QUEST_STATUS_INCOMPLETE) 
+                    return pPlayer;
+        }
+        return NULL;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if(m_bIsEvent)
+        {
+            if(m_uiEventTimer < uiDiff)
+            {
+                switch(m_uiEvent)
+                {
+                    case 0:
+                        //Start event when player find High Abbot.
+                        if(Unit *pPlayer = SearchPlayer())
+                        {
+                            if(pPlayer->IsWithinDist(m_creature, 3.0f))
+                            {
+                                m_uiEventTimer = 10000;
+                                m_uiEvent = 1;
+                            }
+                        }
+                        break;
+                    case 1:
+                        m_creature->GetMotionMaster()->MovePoint(0, 2829.2465f, -414.1662f, 118.1959f);
+                        DoScriptText(SAY_ABBOT_1, m_creature);
+                        m_uiEventTimer = 7000;
+                        m_uiEvent = 2;
+                        break;
+                    case 2:
+                        m_creature->GetMotionMaster()->MovePoint(0, 2810.1494f, -412.5113f, 118.1959f);
+                        m_uiEventTimer = 8000;
+                        m_uiEvent = 3;
+                        break;
+                    case 3:
+                        m_creature->GetMotionMaster()->MovePoint(0, 2784.6982f, -440.1799f, 118.1959f);
+                        m_uiEventTimer = 8000;
+                        m_uiEvent = 4;
+                        break;
+                    case 4:
+                        m_creature->GetMotionMaster()->MovePoint(0, 2765.0727f, -488.1022f, 113.9473f);
+                        m_uiEventTimer = 8000;
+                        m_uiEvent = 5;
+                        break;
+                    case 5:
+                        m_creature->GetMotionMaster()->MovePoint(0, 2736.5898f, -524.2371f, 102.7202f);
+                        m_uiEventTimer = 38000;
+                        m_uiEvent = 6;
+                        break;
+                    case 6:
+                        if(Unit *pPlayer = SearchPlayer())
+                        {
+                            if(pPlayer->IsWithinDist(m_creature, 15.0f))
+                                DoScriptText(SAY_ABBOT_2, m_creature, pPlayer);
+                        }
+                        m_creature->SetOrientation(0.9418f);
+                        m_uiEventTimer = 10000;
+                        m_uiEvent = 7;
+                        break;
+                    case 7:
+                        if(Unit *pPlayer = SearchPlayer())
+                        {
+                            if(pPlayer->IsWithinDist(m_creature, 15.0f))
+                                DoScriptText(SAY_ABBOT_3, m_creature, pPlayer);
+                        }
+                        m_uiEventTimer = 10000;
+                        m_uiEvent = 8;
+                        break;
+                    case 8:
+                        if(Unit *pPlayer = SearchPlayer())
+                        {
+                            if(pPlayer->IsWithinDist(m_creature, 15.0f))
+                                DoScriptText(SAY_ABBOT_4, m_creature, pPlayer);
+                        }
+                        m_uiEventTimer = 10000;
+                        m_uiEvent = 9;
+                        break;
+                    case 9:
+                        if(Unit *pPlayer = SearchPlayer())
+                        {
+                            if(pPlayer->IsWithinDist(m_creature, 2.0f))
+                            {
+                                m_creature->NearTeleportTo(0, 2736.5898f, -544.2371f, 102.7202f);
+                                DoScriptText(SAY_ABBOT_5, m_creature, pPlayer);
+                            }
+                        }
+                        m_uiEventTimer = 4000;
+                        m_uiEvent = 10;
+                        break;
+                    case 10:
+                        m_uiEventTimer = 2000;
+                        m_uiEvent = 11;
+                        break;
+                    case 11:
+                        if(Unit *pPlayer = SearchPlayer())
+                            pPlayer->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        m_uiEventTimer = 5000;
+                        m_uiEvent = 12;
+                        break;
+                    case 12:
+                        m_creature->ForcedDespawn();
+                        break;
+                    default:
+                        break;
+                }
+            }else m_uiEventTimer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_high_abbot(Creature* pCreature)
+{
+    return new npc_high_abbotAI(pCreature);
+}
+
+/************
+**npc_high_abbot_quest
+*************/
+bool GossipHello_npc_high_abbot_quest(Player* pPlayer, Creature* pCreature)
+{
+
+    if(pCreature->isQuestGiver())
+       pPlayer->PrepareQuestMenu( pCreature->GetObjectGuid());
+
+    //Game master can start and test event
+    if (pPlayer->GetDummyAura(48753) || pPlayer->isGameMaster())
+    {
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        pPlayer->SEND_GOSSIP_MENU(100001, pCreature->GetObjectGuid());
+    }
+
+     return true;
+}
+
+bool GossipSelect_npc_high_abbot_quest(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+{
+    pPlayer->CLOSE_GOSSIP_MENU();
+
+    pCreature->SummonCreature(NPC_ABBOT, 2828.3605f, -431.2072f, 119.6244f, 1.5336f, TEMPSUMMON_MANUAL_DESPAWN, 0);
+
+    return true;
+}
+
 void AddSC_dragonblight()
 {
    Script* pNewScript;
@@ -1109,4 +1301,16 @@ void AddSC_dragonblight()
     pNewScript->Name = "npc_warsong_battle_standart";
     pNewScript->GetAI = &GetAI_npc_warsong_battle_standart;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_high_abbot";
+    pNewScript->GetAI = &GetAI_npc_high_abbot;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_high_abbot_quest";
+    pNewScript->pGossipHello = &GossipHello_npc_high_abbot_quest;
+    pNewScript->pGossipSelect = &GossipSelect_npc_high_abbot_quest;
+    pNewScript->RegisterSelf();
 }
+

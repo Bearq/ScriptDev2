@@ -293,9 +293,9 @@ bool GossipHello_npc_sa_vendor(Player* pPlayer, Creature* pCreature)
             if (BattleGround *bg = pPlayer->GetBattleGround())
                 if (bg->GetDefender() != pPlayer->GetTeam())
                 {
-                    if (bg->GetDefender() != ALLIANCE && bg->GetGydController(gyd) == BG_SA_GARVE_STATUS_ALLY_OCCUPIED)
+                    if (bg->GetDefender() != ALLIANCE && bg->GetGydController(gyd) == BG_SA_GRAVE_STATUS_ALLY_OCCUPIED)
                         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-                    if (bg->GetDefender() != HORDE && bg->GetGydController(gyd) == BG_SA_GARVE_STATUS_HORDE_OCCUPIED)
+                    if (bg->GetDefender() != HORDE && bg->GetGydController(gyd) == BG_SA_GRAVE_STATUS_HORDE_OCCUPIED)
                         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
                 }
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
