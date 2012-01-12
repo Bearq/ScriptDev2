@@ -629,7 +629,7 @@ struct MANGOS_DLL_DECL mob_toc_shamanAI : public boss_faction_championsAI
             if(Unit *target = DoSelectLowestHpFriendly(40.0f))
             {
                 DoCastSpellIfCan(target, SPELL_HEALING_WAVE);
-                m_uiHealingWaveTimer = urand(7*IN_MILLISECONDS, 12*IN_MILLISECONDS);
+                m_uiHealingWaveTimer = urand(12*IN_MILLISECONDS, 20*IN_MILLISECONDS);
             }
         }else m_uiHealingWaveTimer -= uiDiff;
 
@@ -646,7 +646,7 @@ struct MANGOS_DLL_DECL mob_toc_shamanAI : public boss_faction_championsAI
                         m_creature->CastSpell(target, SPELL_SPIRIT_CLEANSE , false);
                 }
             }
-            m_uiRiptideTimer = urand(6*IN_MILLISECONDS, 18*IN_MILLISECONDS);
+            m_uiRiptideTimer = urand(8*IN_MILLISECONDS, 18*IN_MILLISECONDS);
         }else m_uiRiptideTimer -= uiDiff;
 
         if(m_uiEarthShieldTimer < uiDiff)
@@ -654,7 +654,7 @@ struct MANGOS_DLL_DECL mob_toc_shamanAI : public boss_faction_championsAI
             if(Unit *target = DoSelectLowestHpFriendly(40.0f))
             {
                 DoCastSpellIfCan(target, SPELL_EARTH_SHIELD);
-                m_uiEarthShieldTimer = urand(10*IN_MILLISECONDS, 18*IN_MILLISECONDS);
+                m_uiEarthShieldTimer = urand(25*IN_MILLISECONDS, 35*IN_MILLISECONDS);
             }
         }else m_uiEarthShieldTimer -= uiDiff;
             
@@ -742,7 +742,7 @@ struct MANGOS_DLL_DECL mob_toc_paladinAI : public boss_faction_championsAI
             if(Unit* target = DoSelectLowestHpFriendly(40.0f))
             {
                 DoCastSpellIfCan(target, SPELL_HOLY_LIGHT);
-                m_uiHolyLightTimer = urand(9*IN_MILLISECONDS, 25*IN_MILLISECONDS);
+                m_uiHolyLightTimer = urand(25*IN_MILLISECONDS, 35*IN_MILLISECONDS);
             }
         }else m_uiHolyLightTimer -= uiDiff;
 
@@ -751,7 +751,7 @@ struct MANGOS_DLL_DECL mob_toc_paladinAI : public boss_faction_championsAI
             if(Unit* target = DoSelectLowestHpFriendly(40.0f))
             {
                 DoCastSpellIfCan(target, SPELL_FLASH_HEAL);
-                m_uiFlashHealTimer = urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS);
+                m_uiFlashHealTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             }
         }else m_uiFlashHealTimer -= uiDiff;
 
@@ -760,7 +760,7 @@ struct MANGOS_DLL_DECL mob_toc_paladinAI : public boss_faction_championsAI
             if (Unit* target = DoSelectLowestHpFriendly(40.0f))
             {
                 DoCastSpellIfCan(target, SPELL_HOLY_SHOCK);
-                m_uiHolyShockTimer = urand(6*IN_MILLISECONDS, 16*IN_MILLISECONDS);
+                m_uiHolyShockTimer = urand(6*IN_MILLISECONDS, 26*IN_MILLISECONDS);
             }
         }else m_uiHolyShockTimer -= uiDiff;
 
@@ -838,7 +838,7 @@ struct MANGOS_DLL_DECL mob_toc_priestAI : public boss_faction_championsAI
             if(Unit* target = DoSelectLowestHpFriendly(40.0f))
             {
                 DoCastSpellIfCan(target, SPELL_FLASH_HEAL_P);
-                m_uiFlashHealTimer = urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS);  
+                m_uiFlashHealTimer = urand(8*IN_MILLISECONDS, 18*IN_MILLISECONDS);  
             }
         }else m_uiFlashHealTimer -= uiDiff;
 
