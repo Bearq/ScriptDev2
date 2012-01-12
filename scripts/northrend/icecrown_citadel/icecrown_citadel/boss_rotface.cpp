@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: boss_rotface
-SD%Complete: 
+SD%Complete: 99%
 SDComment: 
 SDCategory: Icecrown Citadel
 EndScriptData */

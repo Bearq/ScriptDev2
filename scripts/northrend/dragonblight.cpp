@@ -1045,7 +1045,8 @@ enum
     SAY_ABBOT_4             = -1658085,
     SAY_ABBOT_5             = -1658086,
 
-    NPC_ABBOT               = 27444,
+    NPC_ABBOT               = 27439, //This npc start event
+    NPC_ABOT_2              = 27444, //This npc is requir for quest complete
     QUEST_A_FALL_FOR_GRACE  = 12274,
 };
 
@@ -1061,14 +1062,16 @@ struct MANGOS_DLL_DECL npc_high_abbotAI : public ScriptedAI
 
     bool m_bIsEvent;
 
+    ObjectGuid m_AbbotCompleteGuid;
     uint8 m_uiEvent;
     uint32 m_uiEventTimer;
 
     void Reset() 
     {
         m_uiEvent = 0;
-        m_uiEventTimer = 10000;
+        m_uiEventTimer = 5000;
         m_bIsEvent = true;
+        m_AbbotCompleteGuid.Clear();
 
         m_creature->SetRespawnDelay(HOUR);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);        
@@ -1101,7 +1104,7 @@ struct MANGOS_DLL_DECL npc_high_abbotAI : public ScriptedAI
                         {
                             if(pPlayer->IsWithinDist(m_creature, 3.0f))
                             {
-                                m_uiEventTimer = 10000;
+                                m_uiEventTimer = 5000;
                                 m_uiEvent = 1;
                             }
                         }
@@ -1138,7 +1141,7 @@ struct MANGOS_DLL_DECL npc_high_abbotAI : public ScriptedAI
                             if(pPlayer->IsWithinDist(m_creature, 15.0f))
                                 DoScriptText(SAY_ABBOT_2, m_creature, pPlayer);
                         }
-                        m_creature->SetOrientation(0.9418f);
+                        m_creature->SetOrientation(0.8724f);
                         m_uiEventTimer = 10000;
                         m_uiEvent = 7;
                         break;
@@ -1147,7 +1150,7 @@ struct MANGOS_DLL_DECL npc_high_abbotAI : public ScriptedAI
                         {
                             if(pPlayer->IsWithinDist(m_creature, 15.0f))
                                 DoScriptText(SAY_ABBOT_3, m_creature, pPlayer);
-                        }
+                        } 
                         m_uiEventTimer = 10000;
                         m_uiEvent = 8;
                         break;
@@ -1156,6 +1159,7 @@ struct MANGOS_DLL_DECL npc_high_abbotAI : public ScriptedAI
                         {
                             if(pPlayer->IsWithinDist(m_creature, 15.0f))
                                 DoScriptText(SAY_ABBOT_4, m_creature, pPlayer);
+
                         }
                         m_uiEventTimer = 10000;
                         m_uiEvent = 9;
@@ -1165,20 +1169,29 @@ struct MANGOS_DLL_DECL npc_high_abbotAI : public ScriptedAI
                         {
                             if(pPlayer->IsWithinDist(m_creature, 2.0f))
                             {
-                                m_creature->NearTeleportTo(0, 2736.5898f, -544.2371f, 102.7202f);
-                                DoScriptText(SAY_ABBOT_5, m_creature, pPlayer);
+                                if (Creature* pTemp = m_creature->SummonCreature(NPC_ABOT_2, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                                    m_AbbotCompleteGuid = pTemp->GetObjectGuid();
+
+                                DoScriptText(SAY_ABBOT_5, m_creature);
+                                m_uiEventTimer = 4000;
+                                m_uiEvent = 10;
                             }
                         }
-                        m_uiEventTimer = 4000;
-                        m_uiEvent = 10;
                         break;
                     case 10:
+                        m_creature->NearTeleportTo(0, 2736.5898f, -544.2371f, 102.7202f);
                         m_uiEventTimer = 2000;
                         m_uiEvent = 11;
                         break;
                     case 11:
-                        if(Unit *pPlayer = SearchPlayer())
-                            pPlayer->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        if (Creature* pAbbotComplete = m_creature->GetMap()->GetCreature(m_AbbotCompleteGuid))
+                        {
+                            if(Unit *pPlayer = SearchPlayer())
+                            {
+                                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                                pPlayer->DealDamage(pAbbotComplete, pAbbotComplete->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                            }
+                        }
                         m_uiEventTimer = 5000;
                         m_uiEvent = 12;
                         break;

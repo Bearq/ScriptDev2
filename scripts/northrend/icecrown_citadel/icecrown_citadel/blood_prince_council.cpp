@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: blood_prince_council
-SD%Complete:
+SD%Complete: 99%
 SDComment:
 SDCategory: Icecrown Citadel
 EndScriptData */
