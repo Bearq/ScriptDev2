@@ -1042,8 +1042,8 @@ struct MANGOS_DLL_DECL boss_the_lich_king_iccAI : public base_icc_bossAI
                 // Necrotic Plague
                 if (m_uiNecroticPlagueTimer < uiDiff)
                 {
-                    // if (DoCastSpellIfCan(m_creature, SPELL_NECROTIC_PLAGUE) == CAST_OK)
-                        m_uiNecroticPlagueTimer = 15000;
+                    if (DoCastSpellIfCan(m_creature, SPELL_NECROTIC_PLAGUE) == CAST_OK)
+                        m_uiNecroticPlagueTimer = 30000;
                 }
                 else
                     m_uiNecroticPlagueTimer -= uiDiff;

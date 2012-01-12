@@ -416,7 +416,6 @@ UPDATE `creature_template` SET `ScriptName`='boss_the_lich_king_icc', `AIName`='
 UPDATE `creature_template_addon` SET `auras` = '73878 73220 72846' WHERE `entry` IN (36597, 39166, 39167, 39168);
 UPDATE `creature_template` SET `speed_walk` = 1.0, `speed_run` = 1.1 WHERE `entry` IN (36597, 39166, 39167, 39168);
 UPDATE `creature_template` SET `ScriptName`='boss_tirion_icc', `npcflag`=1, `AIName`='' WHERE `entry`= 38995;
-INSERT IGNORE INTO `spell_script_target` (`entry`, `type`, `targetEntry`) VALUES ('71614', '1', '38995');
 UPDATE `creature_template` SET `ScriptName` = 'boss_terenas_menethil_icc' WHERE entry = 38579;
 
 UPDATE `creature_template` SET `ScriptName`='mob_ice_sphere_icc', `AIName`='' WHERE `entry`= 36633;
@@ -432,6 +431,11 @@ UPDATE `creature_template` SET `ScriptName`='mob_valkyr_shadowguard', `AIName`='
 
 -- make Ice Spheres untauntable
 UPDATE `creature_template` SET `mechanic_immune_mask` = `mechanic_immune_mask` | 256 WHERE `entry` IN (36633, 39305, 39306, 39307);
+
+DELETE FROM `spell_script_target` WHERE `entry` IN (71614, 74074);
+INSERT INTO `spell_script_target` (`entry`, `type`, `targetEntry`) VALUES
+(71614, 1, 38995),
+(74074, 1, 36597);
 
 -- Tirion gossip
 DELETE FROM `npc_gossip` WHERE npc_guid = 115781;

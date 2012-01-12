@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment: Quest support: 11570, 11590, 11608, 11676, 11692, 11708, 11919, 11940, 11961. Taxi vendors.
+SDComment: Quest support: 11570, 11590, 11608, 11676, 11692, 11708, 11881, 11919, 11940, 11961. Taxi vendors.
 SDCategory: Borean Tundra
 EndScriptData */
 
@@ -35,6 +35,7 @@ npc_nexus_drake
 go_scourge_cage
 npc_beryl_sorcerer
 npc_seaforium_depth_charge
+npc_jenny
 EndContentData */
 
 #include "precompiled.h"
@@ -2850,6 +2851,70 @@ bool QuestAccept_npc_shadowstalker_getry(Player* pPlayer, Creature* pCreature, c
     return true;
 }
 
+enum
+{
+    QUEST_LOADER_UP     = 11881,
+    GO_PACKAGE          = 142181,   //wrong ID
+    MAX_PACKAGE_COUNT   = 10,
+
+};
+struct MANGOS_DLL_DECL npc_jennyAI : public ScriptedAI
+{
+    npc_jennyAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+       Reset();
+    }
+    bool m_bIsEvent;
+   
+    uint32 m_uiPackageCount;
+
+    void Reset()
+    {
+        m_uiPackageCount = 0;
+        m_bIsEvent = true;
+    }
+  
+    Unit* SearchPlayer()
+    {
+        Map::PlayerList const &PlayerList = m_creature->GetMap()->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+        {
+            Player* pPlayer = itr->getSource();
+            if (pPlayer && pPlayer->GetQuestStatus(QUEST_LOADER_UP) == QUEST_STATUS_INCOMPLETE) 
+                    return pPlayer;
+        }
+        return NULL;
+    }
+
+    void DamageTaken(Unit* pDealer, uint32& uiDamage)
+    {
+        m_uiPackageCount += 1;
+        //m_creature->SummonGameobject(GO_PACKAGE, m_creature->GetPositionX()+1.0f, m_creature->GetPositionY()+1.0f, m_creature->GetPositionZ(), 0.0f, 0);
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if(m_bIsEvent)
+        {
+            if(Unit *pPlayer = SearchPlayer())
+            {
+                m_creature->GetMotionMaster()->MoveFollow(pPlayer, 1.0f, 0);
+            }
+
+            if(m_uiPackageCount >= MAX_PACKAGE_COUNT)
+            {
+                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                m_creature->ForcedDespawn();
+            }
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_jenny(Creature* pCreature)
+{
+    return new npc_jennyAI(pCreature);
+}
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript;
@@ -2980,5 +3045,10 @@ void AddSC_borean_tundra()
 	pNewScript = new Script;
     pNewScript->Name = "npc_varidus_the_flenser";
     pNewScript->GetAI = &GetAI_npc_varidus_the_flenser;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_jenny";
+    pNewScript->GetAI = &GetAI_npc_jenny;
     pNewScript->RegisterSelf();
 }
