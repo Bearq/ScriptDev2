@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment: Quest support: 11570, 11590, 11608, 11676, 11692, 11708, 11881, 11919, 11940, 11961. Taxi vendors.
+SDComment: Quest support: 11570, 11590, 11608, 11676, 11692, 11708, 11881, 11919, 11940, 11560, 11961. Taxi vendors.
 SDCategory: Borean Tundra
 EndScriptData */
 
@@ -36,6 +36,7 @@ go_scourge_cage
 npc_beryl_sorcerer
 npc_seaforium_depth_charge
 npc_jenny
+go_winterfin_tadpol_cage
 EndContentData */
 
 #include "precompiled.h"
@@ -2915,6 +2916,89 @@ CreatureAI* GetAI_npc_jenny(Creature* pCreature)
     return new npc_jennyAI(pCreature);
 }
 
+/*#####
+## go_winterfin_tadpol_cage
+#####*/
+enum
+{
+    QUEST_OH_NOES_THE_TADPOLES = 11560,
+    NPC_WINTERFIN_TADPOLE =  25201,
+
+    SAY_ON_QUEST1 = -1999950,
+    SAY_ON_QUEST2 = -1999951,
+    SAY_ON_QUEST3 = -1999952,
+    SAY_ON_QUEST4 = -1999953,
+    SAY_ON_QUEST5 = -1999954,
+
+    SAY_NOT_ON_QUEST1 = -1999955,
+    SAY_NOT_ON_QUEST2 = -1999956,
+    SAY_NOT_ON_QUEST3 = -1999957,
+    SAY_NOT_ON_QUEST4 = -1999958,
+    SAY_NOT_ON_QUEST5 = -1999959, //$R
+};
+
+bool GOHello_go_tadpole_cage(Player* pPlayer, GameObject* pGo)
+{
+    Creature *pCreature = GetClosestCreatureWithEntry(pGo, NPC_WINTERFIN_TADPOLE, INTERACTION_DISTANCE);
+    if(pCreature)
+    {
+        // if player has this quest than creature says random SAY_ON_QUEST
+        if (pPlayer->GetQuestStatus(QUEST_OH_NOES_THE_TADPOLES) == QUEST_STATUS_INCOMPLETE)
+        {
+            pPlayer->KilledMonsterCredit(NPC_WINTERFIN_TADPOLE, pCreature->GetObjectGuid());
+            switch(urand(0,3))
+            {
+                case 0 :
+                    if(pPlayer->getGender() == 0)
+                    {
+                        DoScriptText(SAY_ON_QUEST1, pCreature);
+                    }
+                    else
+                    {
+                        DoScriptText(SAY_ON_QUEST2, pCreature);
+                    }
+                    break;
+                case 1 : DoScriptText(SAY_ON_QUEST3, pCreature); break;
+                case 2 : DoScriptText(SAY_ON_QUEST4, pCreature); break; 
+                case 3 : DoScriptText(SAY_ON_QUEST5, pCreature); break;
+            }
+
+            //creature runs with the player for a while
+            pCreature->ForcedDespawn(50000);
+            uint8 degrees = urand(-90,90);
+
+            if(degrees < 0)
+            {
+                degrees = 360 + degrees;
+            }
+
+            pCreature->GetMotionMaster()->MoveFollow(pPlayer,2,degrees);   
+        }
+        //if player don't have this quest than creature will say random SAY_NOT_ON_QUEST
+        else
+        {
+            switch(urand(0,3))
+            {
+
+                case 0 : DoScriptText(SAY_NOT_ON_QUEST1, pCreature); break;
+                case 1 : DoScriptText(SAY_NOT_ON_QUEST2, pCreature); break;
+                case 2 :
+                    if(pPlayer->getGender() == 0)
+                    {
+                          DoScriptText(SAY_NOT_ON_QUEST3, pCreature);
+                    }
+                    else
+                    {
+                      DoScriptText(SAY_NOT_ON_QUEST4, pCreature);
+                    }
+                    break;
+                case 3 : DoScriptText(SAY_NOT_ON_QUEST5, pCreature); break; //$R!
+            }
+        }
+    }
+    return false;
+};
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript;
@@ -3050,5 +3134,10 @@ void AddSC_borean_tundra()
     pNewScript = new Script;
     pNewScript->Name = "npc_jenny";
     pNewScript->GetAI = &GetAI_npc_jenny;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_tadpole_cage";
+    pNewScript->pGOUse = &GOHello_go_tadpole_cage;
     pNewScript->RegisterSelf();
 }

@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Storm_Peaks
 SD%Complete: 100
-SDComment: Vendor Support (31247). Quest support: 12970, 12684
+SDComment: Vendor Support (31247). Quest support: 12970, 12684, 12983
 SDCategory: Storm Peaks
 EndScriptData */
 
@@ -25,6 +25,7 @@ EndScriptData */
 npc_loklira_the_crone
 npc_roxi_ramrocket
 npc_frostborn_scout
+npc_harnessed_icemaw
 EndContentData */
 
 #include "precompiled.h"
@@ -333,6 +334,106 @@ CreatureAI* GetAI_npc_overseer_narvir(Creature* pCreature)
     return new npc_overseer_narvir (pCreature);
 }
 
+/********
+** npc_harnessed_icemaw
+*********/
+struct MANGOS_DLL_DECL npc_harnessed_icemawAI : public ScriptedAI
+{
+    npc_harnessed_icemawAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
+    }
+
+    bool m_bIsHerKind;
+
+    uint32 m_uiEventTimer;
+    uint32 m_uiPhase;
+
+    void Reset () 
+    {
+        m_uiEventTimer = 4000;
+        m_uiPhase = 0;
+
+        m_bIsHerKind = true;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (m_uiEventTimer < uiDiff)
+        {
+            switch(m_uiPhase)
+            {
+                case 0: 
+                    m_creature->GetMotionMaster()->MovePoint(0, 7329.4262f, -2095.0290f, 772.7434f);
+                    m_uiPhase = 1;
+                    m_uiEventTimer = 5000;
+                    break;
+                case 1:
+                    m_creature->GetMotionMaster()->MovePoint(0, 7286.2041f, -2112.6110f, 775.8190f);
+                    m_uiPhase = 2;
+                    m_uiEventTimer = 8000;
+                    break;
+                case 2:
+                    m_creature->GetMotionMaster()->MovePoint(0, 7239.8691f, -2120.1247f, 777.5736f);
+                    m_uiPhase = 3;
+                    m_uiEventTimer = 8000;
+                    break;
+                case 3:
+                    m_creature->GetMotionMaster()->MovePoint(0, 7195.2670f, -2108.7006f, 766.2100f);
+                    m_uiPhase = 4;
+                    m_uiEventTimer = 15000;
+                    break;
+                case 4:
+                    m_creature->GetMotionMaster()->MovePoint(0, 7137.6996f, -2140.6071f, 761.1889f);
+                    m_uiPhase = 5;
+                    m_uiEventTimer = 40000;
+                    break;
+                case 5:
+                    m_creature->GetMotionMaster()->MovePoint(0, 7062.8837f, -1914.8781f, 782.7465f);
+                    m_uiPhase = 6;
+                    m_uiEventTimer = 5000;
+                    break;
+                case 6:
+                    m_creature->GetMotionMaster()->MovePoint(0, 7088.5083f, -1889.2677f, 787.8016f);
+                    m_uiPhase = 7;
+                    m_uiEventTimer = 5000;
+                    break;
+                case 7:
+                    m_creature->GetMotionMaster()->MovePoint(0, 7030.2773f, -1880.2751f, 800.9303f);
+                    m_uiPhase = 8;
+                    m_uiEventTimer = 10000;
+                    break;
+                case 8:
+                    m_creature->GetMotionMaster()->MovePoint(0, 7007.7768f, -1713.0822f, 0819.7851f);
+                    m_uiPhase = 9;
+                    m_uiEventTimer = 25000;
+                    break;
+                case 9:
+                    m_creature->GetMotionMaster()->MovePoint(0, 6947.6542f, -1724.4016f, 820.6044f);
+                    m_uiPhase = 10;
+                    m_uiEventTimer = 10000;
+                    break;
+                case 10:
+                    m_creature->GetMotionMaster()->MovePoint(0, 6883.1499f, -1686.7318f, 820.3461f);
+                    m_uiPhase = 11;
+                    m_uiEventTimer = 10000;
+                    break;
+                case 11:
+                    m_creature->GetMotionMaster()->MovePoint(0, 6822.9223f, -1703.5740f, 820.5421f);
+                    m_bIsHerKind = false;
+                    break;
+                default:
+                    break;
+            }
+        }else m_uiEventTimer -= uiDiff;
+    }
+};
+
+CreatureAI* GetAI_npc_harnessed_icemaw(Creature* pCreature)
+{
+    return new npc_harnessed_icemawAI(pCreature);
+}
+
 void AddSC_storm_peaks()
 {
     Script* newscript;
@@ -364,5 +465,10 @@ void AddSC_storm_peaks()
     newscript = new Script;
     newscript->Name = "go_heart_of_the_storm";
     newscript->pGOUse = &GOUse_go_heart_of_the_storm;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_harnessed_icemaw";
+    newscript->GetAI = &GetAI_npc_harnessed_icemaw;
     newscript->RegisterSelf();
 }

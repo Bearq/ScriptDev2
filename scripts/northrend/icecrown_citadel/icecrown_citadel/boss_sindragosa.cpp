@@ -125,7 +125,6 @@ struct MANGOS_DLL_DECL boss_sindragosaAI : public base_icc_bossAI
     uint32 m_uiFrostBreathTimer;
     uint32 m_uiTailSmashTimer;
     uint32 m_uiIcyGripTimer;
-    uint32 m_uiBlisteringColdTimer;
     uint32 m_uiUnchainedMagicTimer;
     uint32 m_uiFlyingTimer;
     uint32 m_uiFrostBeaconTimer;
@@ -141,7 +140,6 @@ struct MANGOS_DLL_DECL boss_sindragosaAI : public base_icc_bossAI
         m_uiTailSmashTimer          = 20000;
         m_uiFrostBreathTimer        = 5000;
         m_uiIcyGripTimer            = 35000;
-        m_uiBlisteringColdTimer     = 36000;
         m_uiUnchainedMagicTimer     = urand(15000, 30000);
 
         m_uiFlyingTimer             = 60000; // debug code
@@ -198,7 +196,7 @@ struct MANGOS_DLL_DECL boss_sindragosaAI : public base_icc_bossAI
             DoMark(max);
 
             // set timers
-            m_uiIceTombTimer    = 6000;
+            m_uiIceTombTimer    = 5500;
             m_uiFrostBombTimer  = 12000;
             m_uiPhaseTimer      = 35000;
         }
@@ -340,7 +338,7 @@ struct MANGOS_DLL_DECL boss_sindragosaAI : public base_icc_bossAI
                 else
                     m_uiUnchainedMagicTimer -= uiDiff;
 
-                // Icy Grip
+                // Icy Grip and Blistering Cold
                 if (m_uiIcyGripTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_ICY_GRIP) == CAST_OK)
@@ -351,15 +349,6 @@ struct MANGOS_DLL_DECL boss_sindragosaAI : public base_icc_bossAI
                 }
                 else
                     m_uiIcyGripTimer -= uiDiff;
-
-                // Blistering Cold
-                if (m_uiBlisteringColdTimer <= uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_BLISTERING_COLD) == CAST_OK)
-                        m_uiBlisteringColdTimer = 35000;
-                }
-                else
-                    m_uiBlisteringColdTimer -= uiDiff;
 
                 // Phase 2 (air)
                 if (m_uiPhaseTimer <= uiDiff)
@@ -484,23 +473,17 @@ struct MANGOS_DLL_DECL boss_sindragosaAI : public base_icc_bossAI
                 else
                     m_uiUnchainedMagicTimer -= uiDiff;
 
-                // Icy Grip
+                // Icy Grip and Blistering Cold
                 if (m_uiIcyGripTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_ICY_GRIP) == CAST_OK)
+                    {
+                        DoScriptText(SAY_BLISTERING_COLD, m_creature);
                         m_uiIcyGripTimer = 35000;
+                    }
                 }
                 else
                     m_uiIcyGripTimer -= uiDiff;
-
-                // Blistering Cold
-                if (m_uiBlisteringColdTimer <= uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_BLISTERING_COLD) == CAST_OK)
-                        m_uiBlisteringColdTimer = 35000;
-                }
-                else
-                    m_uiBlisteringColdTimer -= uiDiff;
 
                 break;
             }
@@ -614,16 +597,17 @@ struct MANGOS_DLL_DECL mob_rimefangAI : public BSWScriptedAI
 
     void Reset()
     {
-        if(!pInstance) return;
-        if (pInstance->GetData(TYPE_SINDRAGOSA) != DONE)
-            pInstance->SetData(TYPE_SINDRAGOSA, NOT_STARTED);
+        if(!pInstance)
+            return;
+
         resetTimers();
         m_creature->SetRespawnDelay(30*MINUTE);
     }
 
     void MoveInLineOfSight(Unit* pWho)
     {
-        if (!pInstance || !pWho) return;
+        if (!pInstance || !pWho)
+            return;
 
         if (pWho->GetTypeId() != TYPEID_PLAYER)
             return;
@@ -639,32 +623,28 @@ struct MANGOS_DLL_DECL mob_rimefangAI : public BSWScriptedAI
         ScriptedAI::MoveInLineOfSight(pWho);
     }
 
-    void JustReachedHome()
-    {
-        if (pInstance)
-            if (pInstance->GetData(TYPE_SINDRAGOSA) != DONE)
-                pInstance->SetData(TYPE_SINDRAGOSA, FAIL);
-    }
-
     void Aggro(Unit *who)
     {
-        if(!pInstance) return;
-        if (pInstance->GetData(TYPE_SINDRAGOSA) != DONE) pInstance->SetData(TYPE_SINDRAGOSA, IN_PROGRESS);
+        if(!pInstance)
+            return;
+
         pBrother = pInstance->GetSingleCreatureFromStorage(NPC_SPINESTALKER);
-        if (pBrother && !pBrother->isAlive()) pBrother->Respawn();
-        if (pBrother) pBrother->SetInCombatWithZone();
+
+        if (pBrother && !pBrother->isAlive())
+            pBrother->Respawn();
+
+        if (pBrother)
+            pBrother->SetInCombatWithZone();
     }
 
     void JustDied(Unit *killer)
     {
-        if(!pInstance) return;
-        if (pInstance->GetData(TYPE_SINDRAGOSA) == DONE)
+        if(!pInstance)
             return;
-        if (pBrother && !pBrother->isAlive())
-        if (pBrother && !pBrother->isAlive())
+
+        if (pBrother && !pBrother->isAlive() && pInstance->GetData(TYPE_SINDRAGOSA) != DONE)
         {
-            Creature* pSindr = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaLoc[0].x, SindragosaLoc[0].y, SindragosaLoc[0].z, 3.17f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR*IN_MILLISECONDS, true);
-            if (pSindr)
+            if (Creature* pSindr = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaLoc[0].x, SindragosaLoc[0].y, SindragosaLoc[0].z, 3.17f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR*IN_MILLISECONDS, true))
                 pSindr->SetCreatorGuid(ObjectGuid());
         }
     }
@@ -705,9 +685,9 @@ struct MANGOS_DLL_DECL mob_spinestalkerAI : public BSWScriptedAI
 
     void Reset()
     {
-        if(!pInstance) return;
-        if (pInstance->GetData(TYPE_SINDRAGOSA) != DONE)
-            pInstance->SetData(TYPE_SINDRAGOSA, NOT_STARTED);
+        if(!pInstance)
+            return;
+
         resetTimers();
         m_creature->SetRespawnDelay(30*MINUTE);
     }
@@ -730,32 +710,28 @@ struct MANGOS_DLL_DECL mob_spinestalkerAI : public BSWScriptedAI
         ScriptedAI::MoveInLineOfSight(pWho);
     }
 
-    void JustReachedHome()
-    {
-        if (pInstance)
-            if (pInstance->GetData(TYPE_SINDRAGOSA) != DONE)
-                pInstance->SetData(TYPE_SINDRAGOSA, FAIL);
-    }
-
     void Aggro(Unit *who)
     {
-        if(!pInstance) return;
-        if (pInstance->GetData(TYPE_SINDRAGOSA) != DONE) pInstance->SetData(TYPE_SINDRAGOSA, IN_PROGRESS);
+        if(!pInstance)
+            return;
+
         pBrother = pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG);
-        if (pBrother && !pBrother->isAlive()) pBrother->Respawn();
-        if (pBrother) pBrother->SetInCombatWithZone();
+
+        if (pBrother && !pBrother->isAlive())
+            pBrother->Respawn();
+
+        if (pBrother)
+            pBrother->SetInCombatWithZone();
     }
 
     void JustDied(Unit *killer)
     {
         if (!pInstance)
             return;
-        if (pInstance->GetData(TYPE_SINDRAGOSA) == DONE)
-            return;
-        if (pBrother && !pBrother->isAlive())
+
+        if (pBrother && !pBrother->isAlive() && pInstance->GetData(TYPE_SINDRAGOSA) != DONE)
         {
-            Creature* pSindr = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaLoc[0].x, SindragosaLoc[0].y, SindragosaLoc[0].z, 3.17f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR*IN_MILLISECONDS, true);
-            if (pSindr)
+            if (Creature* pSindr = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaLoc[0].x, SindragosaLoc[0].y, SindragosaLoc[0].z, 3.17f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR*IN_MILLISECONDS, true))
                 pSindr->SetCreatorGuid(ObjectGuid());
         }
     }
