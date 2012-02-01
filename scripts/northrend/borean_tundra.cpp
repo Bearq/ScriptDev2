@@ -952,7 +952,6 @@ enum
 struct MANGOS_DLL_DECL npc_nexus_drakeAI : public FollowerAI
 {
     npc_nexus_drakeAI(Creature* pCreature) : FollowerAI(pCreature) { Reset(); }
-    
      ObjectGuid uiHarpoonerGuid;
      bool bWithRedDragonBlood;
      bool bIsFollowing;
@@ -992,11 +991,10 @@ struct MANGOS_DLL_DECL npc_nexus_drakeAI : public FollowerAI
          {
            if (Player *pHarpooner = m_creature->GetMap()->GetPlayer(uiHarpoonerGuid))
                  {
-                    
                      pHarpooner->KilledMonsterCredit(DRAKE_HUNT_KILL_CREDIT, m_creature->GetObjectGuid());
                      pHarpooner->RemoveAurasByCasterSpell(SPELL_DRAKE_HATCHLING_SUBDUED, uiHarpoonerGuid);
                      SetFollowComplete();
-                     uiHarpoonerGuid = 0;
+                     uiHarpoonerGuid.Clear();
                      m_creature->ForcedDespawn(1000);
                  }
 
@@ -1237,10 +1235,10 @@ struct MANGOS_DLL_DECL npc_thassarianAI : public ScriptedAI
 
     void Reset()
     {
-        m_uiValanarGuid = 0;
-        m_uiLichKingGuid = 0;
-        m_uiLeryssaGuid = 0;
-        m_uiArlosGuid = 0;
+        m_uiValanarGuid.Clear();
+        m_uiLichKingGuid.Clear();
+        m_uiLeryssaGuid.Clear();
+        m_uiArlosGuid.Clear();
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         if (m_creature->GetAreaId() == AREA_ID)
             m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);

@@ -343,6 +343,7 @@ struct MANGOS_DLL_DECL boss_faction_championsAI : public BSWScriptedAI
             m_creature->ModifyPower(POWER_MANA, m_creature->GetMaxPower(POWER_MANA) / 3);
     }
 
+    //Hack for PVP Trinket
     void RemoveCC()
     {
         m_creature->RemoveSpellsCausingAura(SPELL_AURA_MOD_STUN);
@@ -353,9 +354,7 @@ struct MANGOS_DLL_DECL boss_faction_championsAI : public BSWScriptedAI
         //DoCast(m_creature, SPELL_PVP_TRINKET);
     }
 
- 
-
-    //add
+    //For Mana Burn, Sting etc.
     Unit* SelectEnemyTargetWithinMana()
     {
         ThreatList const& tList = m_creature->getThreatManager().getThreatList();
@@ -370,6 +369,7 @@ struct MANGOS_DLL_DECL boss_faction_championsAI : public BSWScriptedAI
         return NULL;
     }
 
+    //For spell Charge, Death Grip etc.
     Unit* SelectTargetWithinDist()
     {
         ThreatList const& m_threatlist = m_creature->getThreatManager().getThreatList();
@@ -405,19 +405,18 @@ struct MANGOS_DLL_DECL boss_faction_championsAI : public BSWScriptedAI
        if (m_pInstance && m_pInstance->GetData(TYPE_CRUSADERS) != IN_PROGRESS) 
             m_creature->ForcedDespawn();
 
-        /*if(m_uiChangeTargetTimer < uiDiff)
+        if(m_uiChangeTargetTimer < uiDiff)
         {
             UpdateThreat();
             m_uiChangeTargetTimer = 6000;
-        }else m_uiChangeTargetTimer -= uiDiff;*/
+        }else m_uiChangeTargetTimer -= uiDiff;
 
         if(UpdateTimer < uiDiff)
         {
             UpdatePower();
-            UpdateTimer = 2000;
-        }
-        else UpdateTimer -= uiDiff;
-
+            UpdateTimer = 4000;
+        }else UpdateTimer -= uiDiff;
+        
         if(m_bIsHeroicMode)
         {
             if(m_uiInsygniaTimer < uiDiff)

@@ -194,7 +194,7 @@ struct MANGOS_DLL_DECL npc_mikeAI : public ScriptedAI
               m_uiStepTimer = 4000;
               break;
            case 1:
-              m_creature->SetGuidValue(UNIT_FIELD_TARGET, 0);
+              m_creature->SetGuidValue(UNIT_FIELD_TARGET, ObjectGuid());
               m_uiStepTimer = 5000;
               break;
            case 2:
@@ -530,9 +530,9 @@ struct MANGOS_DLL_DECL npc_moriganAI : public ScriptedAI
               m_uiStepTimer = 4000;
               break;
            case 12:
-              m_creature->SetGuidValue(UNIT_FIELD_TARGET, 0);
+              m_creature->SetGuidValue(UNIT_FIELD_TARGET, ObjectGuid());
               if(Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_PERELLI))
-                 pTemp->SetGuidValue(UNIT_FIELD_TARGET, 0);
+                 pTemp->SetGuidValue(UNIT_FIELD_TARGET, ObjectGuid());
               MoveToPoint(m_creature, 1576.119f, 657.675f, 102.09f, 5000);
               m_uiStepTimer = 4900;
               break;
@@ -674,14 +674,14 @@ struct MANGOS_DLL_DECL npc_jenaAI : public ScriptedAI
               m_uiStepTimer = 3000;
               break;
            case 9:
-              m_creature->SetGuidValue(UNIT_FIELD_TARGET, 0);
+              m_creature->SetGuidValue(UNIT_FIELD_TARGET, ObjectGuid());
               m_creature->GetMotionMaster()->MovePoint(0, 1629.278f, 727.894f, 112.636f);
               m_uiStepTimer = 1500;
               break;
            case 10:
               if(Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_MARTHA))
               {
-                 pTemp->SetGuidValue(UNIT_FIELD_TARGET, 0);
+                 pTemp->SetGuidValue(UNIT_FIELD_TARGET, ObjectGuid());
                  pTemp->GetMap()->CreatureRelocation(pTemp, 1640.089f, 725.766f, 113.561f, 4.77f);
                  pTemp->MonsterMoveWithSpeed(1640.089f, 725.766f, 113.561f, 1500);
               }
@@ -717,7 +717,7 @@ struct MANGOS_DLL_DECL npc_jenaAI : public ScriptedAI
                  DoScriptText(SAY_MARTHA05, pTemp);
                  MoveToPoint(pTemp, 1638.196f, 726.171f, 113.561f, 1000);
               }
-              m_creature->SetGuidValue(UNIT_FIELD_TARGET, 0);
+              m_creature->SetGuidValue(UNIT_FIELD_TARGET, ObjectGuid());
               MoveToPoint(m_creature, 1615.590f, 719.509f, 110.311f, 2000);
               m_uiStepTimer = 2000;
               break;
@@ -858,7 +858,7 @@ struct MANGOS_DLL_DECL npc_malcolmAI : public ScriptedAI
               m_uiStepTimer = 4000;
               break;
            case 8:
-              m_creature->SetGuidValue(UNIT_FIELD_TARGET, 0);
+              m_creature->SetGuidValue(UNIT_FIELD_TARGET, ObjectGuid());
               MoveToPoint(m_creature, 1629.922f, 807.799f, 120.122f, 3000);
               m_uiStepTimer = 2900;
               break;
@@ -890,7 +890,7 @@ struct MANGOS_DLL_DECL npc_malcolmAI : public ScriptedAI
            case 14:
              if(Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_DOG))
                 pTemp->SetStandState(UNIT_STAND_STATE_SIT);
-              m_creature->SetGuidValue(UNIT_FIELD_TARGET, 0);
+              m_creature->SetGuidValue(UNIT_FIELD_TARGET, ObjectGuid());
               MoveToPoint(m_creature, 1641.452f, 812.600f, 119.948f, 4000);
               m_uiStepTimer = 3900;
               break;
