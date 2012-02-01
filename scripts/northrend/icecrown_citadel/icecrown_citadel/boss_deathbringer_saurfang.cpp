@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +16,12 @@
 
 /* ScriptData
 SDName: boss_deathbringer_saurfang
-SD%Complete: 99%
-SDComment: Events - intro and outro missing for alliance version
+SD%Complete: 90%
+SDComment:  by michalpolko with special thanks to:
+            mangosR2 team and all who are supporting us with feedback, testing and fixes
+            TrinityCore for some info about spells IDs
+            everybody whom I forgot to mention here ;)
+
 SDCategory: Icecrown Citadel
 EndScriptData */
 
@@ -151,6 +155,16 @@ float fPositions[12][4] =
     {-536.87f, 2205.68f, 539.30f, 6.28f} // guard npc4 first move
 };
 
+// passive guards AI
+struct MANGOS_DLL_DECL npc_deathbringer_event_guards_iccAI : public ScriptedAI
+{
+    npc_deathbringer_event_guards_iccAI(Creature* pCreature) : ScriptedAI(pCreature){}
+
+    void Reset(){}
+    void UpdateAI(const uint32 uiDiff){}
+    void AttackStart(Unit *pWho){}
+};
+
 // Event handler
 struct MANGOS_DLL_DECL npc_highlord_saurfang_iccAI : public base_icc_bossAI
 {
@@ -175,6 +189,8 @@ struct MANGOS_DLL_DECL npc_highlord_saurfang_iccAI : public base_icc_bossAI
     {
         uiDamage = 0;
     }
+
+    void AttackStart(Unit *pWho){}
 
     Creature* GetSaurfang()
     {
@@ -298,6 +314,8 @@ struct MANGOS_DLL_DECL npc_highlord_saurfang_iccAI : public base_icc_bossAI
                         pSaurfang->GetPosition(x, y, z);
 
                     DoScriptText(SAY_INTRO_HORDE_8, m_creature);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
                     m_creature->SetWalk(false);
                     m_creature->GetMotionMaster()->MovePoint(0, x, y, z);
 
@@ -308,9 +326,15 @@ struct MANGOS_DLL_DECL npc_highlord_saurfang_iccAI : public base_icc_bossAI
                         {
                             pTmp->SetWalk(false);
                             pTmp->GetMotionMaster()->MovePoint(0, x, y, z);
+                            pTmp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                            pTmp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
                         }
                     }
-                    NextStep(2000);
+
+                    if (Creature *pSaurfang = GetSaurfang())
+                        pSaurfang->CastSpell(pSaurfang, SPELL_GRIP_OF_AGONY, true);
+
+                    NextStep(1500);
                     break;
                 }
                 case 10:
@@ -322,8 +346,6 @@ struct MANGOS_DLL_DECL npc_highlord_saurfang_iccAI : public base_icc_bossAI
                     m_creature->SetLevitate(true);
                     m_creature->GetPosition(x, y, z);
                     m_creature->GetMotionMaster()->MovePoint(0, x, y, z + frand(5.0f, 7.0f));
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
 
                     // move guards
                     for (GUIDList::iterator i = m_lGuards.begin(); i != m_lGuards.end(); ++i)
@@ -335,16 +357,11 @@ struct MANGOS_DLL_DECL npc_highlord_saurfang_iccAI : public base_icc_bossAI
                             pTmp->SetLevitate(true);
                             pTmp->GetPosition(x, y, z);
                             pTmp->GetMotionMaster()->MovePoint(0, x, y, z + frand(5.0f, 7.0f));
-                            pTmp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-                            pTmp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
                         }
                     }
                     if (Creature *pSaurfang = GetSaurfang())
-                    {
                         DoScriptText(SAY_INTRO_HORDE_9, pSaurfang);
-                        // doesnt work :/ can't target creatures, need to check why
-                        pSaurfang->CastSpell(pSaurfang, SPELL_GRIP_OF_AGONY, true);
-                    }
+
                     NextStep(10000);
                     break;
                 }
@@ -394,6 +411,7 @@ struct MANGOS_DLL_DECL npc_highlord_saurfang_iccAI : public base_icc_bossAI
                 {
                     m_creature->SetLevitate(false);
                     m_creature->SetSpeedRate(MOVE_WALK, 1.0f);
+                    m_creature->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
 
                     for (GUIDList::iterator i = m_lGuards.begin(); i != m_lGuards.end(); ++i)
                     {
@@ -402,6 +420,7 @@ struct MANGOS_DLL_DECL npc_highlord_saurfang_iccAI : public base_icc_bossAI
                             pGuard->SetLevitate(false);
                             pGuard->SetSpeedRate(MOVE_WALK, 1.0f);
                             pGuard->GetMotionMaster()->MoveFollow(m_creature, frand(2.0f, 5.0f), frand(M_PI_F / 2, 1.5f * M_PI_F));
+                            pGuard->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
                         }
                     }
 
@@ -584,7 +603,6 @@ struct MANGOS_DLL_DECL boss_deathbringer_saurfangAI : public base_icc_bossAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
     }
 
-    // used for unlocking bugged encounter
     void JustDied(Unit *pKiller)
     {
         if (m_pInstance)
@@ -785,6 +803,11 @@ CreatureAI* GetAI_npc_highlord_saurfang_icc(Creature* pCreature)
     return new npc_highlord_saurfang_iccAI(pCreature);
 }
 
+CreatureAI* GetAI_npc_deathbringer_event_guards_iccAI(Creature* pCreature)
+{
+    return new npc_deathbringer_event_guards_iccAI(pCreature);
+}
+
 struct MANGOS_DLL_DECL  mob_blood_beastAI : public ScriptedAI
 {
     mob_blood_beastAI(Creature *pCreature) : ScriptedAI(pCreature)
@@ -852,6 +875,11 @@ void AddSC_boss_deathbringer_saurfang()
     newscript = new Script;
     newscript->Name = "npc_highlord_saurfang_icc";
     newscript->GetAI = &GetAI_npc_highlord_saurfang_icc;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_deathbringer_event_guards_iccAI";
+    newscript->GetAI = &GetAI_npc_deathbringer_event_guards_iccAI;
     newscript->RegisterSelf();
 
     newscript = new Script;

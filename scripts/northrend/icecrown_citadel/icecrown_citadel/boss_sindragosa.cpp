@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +16,12 @@
 
 /* ScriptData
 SDName: boss_sindragosa
-SD%Complete: 
-SDComment: 
+SD%Complete: 99%
+SDComment:  by michalpolko with special thanks to:
+            mangosR2 team and all who are supporting us with feedback, testing and fixes
+            TrinityCore for some info about spells IDs
+            everybody whom I forgot to mention here ;)
+
 SDCategory: Icecrown Citadel
 EndScriptData */
 
@@ -353,15 +357,19 @@ struct MANGOS_DLL_DECL boss_sindragosaAI : public base_icc_bossAI
                 // Phase 2 (air)
                 if (m_uiPhaseTimer <= uiDiff)
                 {
-                    m_uiPhaseTimer = 35000;
-                    m_uiPhase = PHASE_FLYING;
-                    DoScriptText(SAY_TAKEOFF, m_creature);
+                    // first phase transition at 85% HP, every next after 1:50
+                    if (m_creature->GetHealthPercent() <= 85.0f)
+                    {
+                        m_uiPhaseTimer = 35000;
+                        m_uiPhase = PHASE_FLYING;
+                        DoScriptText(SAY_TAKEOFF, m_creature);
 
-                    // fly to the air point
-                    SetCombatMovement(false);
-                    m_creature->SetLevitate(true);
-                    m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
-                    m_creature->GetMotionMaster()->MovePoint(POINT_AIR, SindragosaLoc[1].x, SindragosaLoc[1].y, SindragosaLoc[1].z, false);
+                        // fly to the air point
+                        SetCombatMovement(false);
+                        m_creature->SetLevitate(true);
+                        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                        m_creature->GetMotionMaster()->MovePoint(POINT_AIR, SindragosaLoc[1].x, SindragosaLoc[1].y, SindragosaLoc[1].z, false);
+                    }
                 }
                 else
                     m_uiPhaseTimer -= uiDiff;
@@ -404,7 +412,7 @@ struct MANGOS_DLL_DECL boss_sindragosaAI : public base_icc_bossAI
                 if (m_uiPhaseTimer <= uiDiff)
                 {
                     m_uiPhase = PHASE_FLYING;
-                    m_uiPhaseTimer = 42000;
+                    m_uiPhaseTimer = 110000;
 
                     // fly to the ground point
                     m_creature->GetMotionMaster()->MovePoint(POINT_LAND, SindragosaLoc[0].x, SindragosaLoc[0].y, SindragosaLoc[0].z, false);
